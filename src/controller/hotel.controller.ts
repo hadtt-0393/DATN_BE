@@ -8,6 +8,7 @@ const AuthController = {
 	async getHotelsByCity(req: Request, res: Response) {
 		try {
 			const city = req.params.city
+			console.log(city);
 			const hotels = await HotelSchema.find({ city });
 			return res.status(200).json(hotels);
 		} catch (error) {
@@ -39,8 +40,8 @@ const AuthController = {
 	async getTopTenRating(req: Request, res: Response) {
 		try {
 			const top10Rating = await HotelSchema.find({})
-				.sort({ ratingAvg: -1 })  // Sắp xếp theo giá giảm dần
-				.limit(10);           // Giới hạn kết quả trả về 10 bản ghi
+				.sort({ ratingAvg: -1 })  
+				.limit(10);           
 			return res.status(200).json(top10Rating);
 		} catch (err) {
 			return res.status(400).json({ error: err });
@@ -50,8 +51,8 @@ const AuthController = {
 	async getTopTenNewest(req: Request, res: Response) {
 		try {
 			const top10Newest = await HotelSchema.find({})
-				.sort({ createdAt: -1 })  // Sắp xếp theo createdAt giảm dần
-				.limit(10);               // Giới hạn kết quả trả về 10 bản ghi
+				.sort({ createdAt: -1 }) 
+				.limit(10);             
 			return res.status(200).json(top10Newest);
 		} catch (err) {
 			return res.status(400).json({ error: err });

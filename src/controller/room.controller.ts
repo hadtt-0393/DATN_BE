@@ -9,7 +9,7 @@ const RoomController = {
 		const id = req.params.id;
 		const hotel = await HotelSchema.findById(id)
 		const roomList = await Promise.all(
-			hotel!.rooms.map((roomId) => {
+			hotel!.roomIds.map((roomId) => {
 				return RoomSchema.findById(roomId);
 			}),
 		);

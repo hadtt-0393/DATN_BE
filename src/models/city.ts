@@ -14,7 +14,7 @@ const CitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    hotels: {
+    hotelIds: {
       type: [String],
       required: true,
     }

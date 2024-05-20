@@ -4,48 +4,71 @@ const HotelSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      required: true,
     },
-    city: {
+    email: {
       type: String,
+      required: true,
     },
     address: {
       type: String,
+      require: true,
+    },
+    hotline: {
+      type: String,
+      require: true,
+    },
+    images: {
+      type: [String],
+      require: true,
+    },
+    cheapestPrice: {
+      type: Number,
+      require: true,
+    },
+    highestPrice: {
+      type: Number,
+      require: true,
+    },
+    city: {
+      type: String,
+      required: true,
     },
     distance: {
       type: String,
-    },
-    photos: {
-      type: [String],
+      require: true,
     },
     description: {
       type: String,
     },
-    rating: {
+    ratingAvg: {
       type: Number,
       min: 0,
       max: 5,
     },
-    rooms: {
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    roomIds: {
       type: [String],
     },
-    cheapestPrice: {
-      type: Number,
+    roomType: {
+      type: [String],
+      require: true,
     },
     services: {
       type: [String],
+      require: true,
     },
     featured: {
       type: Boolean,
       default: false,
     },
-    comment: {
+    comments: {
       type: [],
       default: [],
     },
-    ratingAvg: {
-      type: Number,
-      default: 0,
-    }
 
   },
   { timestamps: true },

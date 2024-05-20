@@ -5,28 +5,21 @@ const FormSchema = new mongoose.Schema(
     userId: {
       type: String,
     },
-    isTravelForWork: {
-      type: Boolean,
+    hotelId: {
+      type: String,
     },
-    firstName: {
+    roomIds: {
+      type: [String],
+    },
+    name: {
       type: String,
       required: true,
     },
-    lastName: {
+    address: {
       type: String,
       required: true,
     },
     email: {
-      type: String,
-      required: true,
-    },
-    whoBookingFor: {
-      type: Boolean,
-    },
-    specialRequest: {
-      type: String,
-    },
-    country: {
       type: String,
       required: true,
     },
@@ -38,17 +31,27 @@ const FormSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    hotelId: {
-      type: String,
-    },
-    roomIds: {
-      type: String,
-    },
     startDate: { type: Date },
     endDate: { type: Date },
-    comment: { 
+    comment: {
       type: String,
       default: '',
+    },
+    adults: {
+      type: Number,
+      default: 1,
+    },
+    childrent: {
+      type: Number,
+      default: 0,
+    },
+    note:{
+      type: String,
+      default: '',
+    },
+    paymentStatus: {
+      type: Boolean,
+      default: false,
     },
     rating: {
       type: Number,

@@ -17,14 +17,23 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  phone: {
+  phoneNumber: {
     type: String,
     require: true,
   },
-  city:{
+  city: {
     type: String,
     require: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    require: true,
+  },
+  isStaff: {
+    type: Boolean,
+    require: true,
   }
+
 
 }, { timestamps: true },);
 

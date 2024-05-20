@@ -32,6 +32,12 @@ const RoomSchema = new mongoose.Schema(
         status: {
             type: Boolean,
             required: true,
+        },
+        isDiscount: {
+            type: Number,
+        },
+        busyDate: {
+            type: [String]
         }
     },
     { timestamps: true },
