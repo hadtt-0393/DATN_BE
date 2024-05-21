@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const UserSchema = new Schema({
+const StaffSchema = new Schema({
   email: {
     type: String,
     lowercase: true,
@@ -23,20 +23,11 @@ const UserSchema = new Schema({
     type: String,
     require: true,
   },
-  isAdmin: {
-    type: Boolean,
-    require: true,
-  },
-  isStaff: {
-    type: Boolean,
-    require: true,
-  }
-
 
 }, { timestamps: true },);
 
-UserSchema.statics.findByEmail = async function (email: string) {
+StaffSchema.statics.findByEmail = async function (email: string) {
   return this.findOne({ email });
 };
 
-export default mongoose.model("user", UserSchema);
+export default mongoose.model("staff", StaffSchema);

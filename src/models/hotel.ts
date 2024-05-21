@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 const HotelSchema = new mongoose.Schema(
   {
-    name: {
+    username: {
+      type: String,
+      required: true,
+    },
+    owner: {
       type: String,
       required: true,
     },
@@ -35,7 +39,7 @@ const HotelSchema = new mongoose.Schema(
       required: true,
     },
     distance: {
-      type: String,
+      type: Number,
       require: true,
     },
     description: {
@@ -69,6 +73,11 @@ const HotelSchema = new mongoose.Schema(
       type: [],
       default: [],
     },
+    isActive: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
 
   },
   { timestamps: true },

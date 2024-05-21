@@ -1,0 +1,1 @@
+export interface TokenPayload { id: string, isStaff: boolean }
