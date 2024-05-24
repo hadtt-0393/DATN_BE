@@ -40,34 +40,31 @@ const HotelSchema = new mongoose.Schema(
     },
     distance: {
       type: Number,
+      default: null,
       require: true,
     },
     description: {
       type: String,
+      require: true,
     },
     ratingAvg: {
       type: Number,
       min: 0,
       max: 5,
+      require: true,
     },
     discount: {
       type: Number,
+      require: true,
       default: 0,
     },
-    roomIds: {
-      type: [String],
-    },
-    roomType: {
+    rooms: {
       type: [String],
       require: true,
     },
     services: {
       type: [String],
       require: true,
-    },
-    featured: {
-      type: Boolean,
-      default: false,
     },
     comments: {
       type: [],

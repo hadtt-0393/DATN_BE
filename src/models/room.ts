@@ -2,8 +2,12 @@ import mongoose from 'mongoose';
 
 const RoomSchema = new mongoose.Schema(
     {
-        name: {
+        roomNumber: {
             type: String,
+            required: true,
+        },
+        price: {
+            type: Number,
             required: true,
         },
         type: {
@@ -12,18 +16,15 @@ const RoomSchema = new mongoose.Schema(
         },
         services: {
             type: [String],
+            required: true,
         },
         max_person: {
             type: Number,
-            required: true,
-        },
-        price: {
-            type: Number,
-            required: true,
+            // required: true,
         },
         image: {
             type: String,
-            required: true,
+            // required: true,
         },
         description: {
             type: String,
@@ -37,7 +38,8 @@ const RoomSchema = new mongoose.Schema(
             type: Number,
         },
         busyDate: {
-            type: [String]
+            type: [String],
+            // required: true,
         }
     },
     { timestamps: true },

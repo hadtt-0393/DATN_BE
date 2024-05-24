@@ -3,7 +3,6 @@ const Schema = mongoose.Schema;
 const StaffSchema = new Schema({
   email: {
     type: String,
-    lowercase: true,
     required: true,
   },
   password: {

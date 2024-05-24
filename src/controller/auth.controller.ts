@@ -104,11 +104,11 @@ const AuthController = {
 			});
 
 			const newHotel = await HotelSchema.create({
-				name: username,
+				username: username,
 				city: city,
 				owner: newStaff.id,
 				email: email,
-				phone: phone,
+				hotline: phone,
 			})
 
 			const { password: string, ...rest } = newStaff.toObject();

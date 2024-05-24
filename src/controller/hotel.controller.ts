@@ -44,17 +44,26 @@ const HotelController = {
 
 	async updateHotel(req: RequestWithUser, res: Response) {
 		try {
-			const {distance, description, usename, city} = req.body;
+			const {distance, description, username, city, cheapestPrice, highestPrice, discount, address, services, images} = req.body;
 			const id = req.user.id;
-			console.log(id)
             const hotel = await HotelSchema.findOneAndUpdate({ owner: id }, {
 				distance: distance,
                 description: description,
-                username: usename,
+                username: username,
                 city: city,
+				address: address,
+				cheapestPrice: cheapestPrice,
+				highestPrice: highestPrice,
+				discount: discount,
+				services,
+				images,
 				isActive: true,
-			});
-			console.log('log')
+			},
+			{
+				new: true,
+                useFindAndModify: false,
+			}
+			);
             return res.status(200).json(hotel);
 		}
 		catch(error){
