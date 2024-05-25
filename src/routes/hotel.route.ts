@@ -4,7 +4,7 @@ import middlewareToken from "../middleware/verifyToken";
 const route = Router();
 
 route.get("/getAllHotel", HotelController.getAllHotel);         //lay ra toan bo hotel isActive
-route.get("/count", HotelController.getHotelsByCity);           // lay ra hotel by city
+route.get("/count", HotelController.getHotelsByCity);           // lay ra hotel by city             //ngung
 route.get("/topTenRating", HotelController.getTopTenRating);    // lay ra top10 hotel by Rating
 route.get("/topTenNewest", HotelController.getTopTenNewest);    // lay ra top10 hotel theo thoi gian tao
 route.get("/getHotelBySearch", HotelController.getHotelBySearch); //lay ra hotel by search

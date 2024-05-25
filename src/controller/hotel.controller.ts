@@ -112,6 +112,7 @@ const HotelController = {
 			const people = Math.ceil(totalPeople / roomNum);
 			const hotels = await HotelSchema.find({ isActive: true, city });
 			const formatStart = new Date(startDate)
+			console.log(formatStart)
 			const formatEnd = new Date(endDate)
 
 
@@ -138,10 +139,6 @@ const HotelController = {
 					}),
 				);
 
-				// const availableRooms = roomList.filter(room => {
-				// 	return isRoomAvailable(formatStart, formatEnd, room?.bookings);
-				// });
-
 				const suitableRooms = roomList.filter(room => {
 					return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings);
 				});
@@ -154,7 +151,7 @@ const HotelController = {
 					});
 				}
 			}
-			res.status(200).json({ hotels: availableHotels });
+			res.status(200).json(availableHotels);
 		} catch (error) {
 			return res.status(400).json({ error: error });
 		}
