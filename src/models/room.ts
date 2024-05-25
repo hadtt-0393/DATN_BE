@@ -20,7 +20,7 @@ const RoomSchema = new mongoose.Schema(
         },
         max_person: {
             type: Number,
-            // required: true,
+            required: true,
         },
         image: {
             type: String,
@@ -37,9 +37,9 @@ const RoomSchema = new mongoose.Schema(
         isDiscount: {
             type: Number,
         },
-        busyDate: {
-            type: [String],
-            // required: true,
+        bookings: {
+            type: Array,
+            default: [],
         }
     },
     { timestamps: true },

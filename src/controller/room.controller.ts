@@ -82,7 +82,6 @@ const RoomController = {
             await room.save();
             hotel!.rooms.push(room.id);
             await hotel!.save();
-			console.log('room')
             res.status(200).json(room);
 		} catch (error) {
 			return res.status(400).json({ error: error });

@@ -3,6 +3,7 @@
 import { Request, Response } from "express";
 import { Document } from "mongoose";
 import HotelSchema from "../models/hotel";
+import RoomSchema from "../models/room";
 
 interface RequestWithUser extends Request {
 	user: any;
@@ -44,13 +45,13 @@ const HotelController = {
 
 	async updateHotel(req: RequestWithUser, res: Response) {
 		try {
-			const {distance, description, username, city, cheapestPrice, highestPrice, discount, address, services, images} = req.body;
+			const { distance, description, username, city, cheapestPrice, highestPrice, discount, address, services, images } = req.body;
 			const id = req.user.id;
-            const hotel = await HotelSchema.findOneAndUpdate({ owner: id }, {
+			const hotel = await HotelSchema.findOneAndUpdate({ owner: id }, {
 				distance: distance,
-                description: description,
-                username: username,
-                city: city,
+				description: description,
+				username: username,
+				city: city,
 				address: address,
 				cheapestPrice: cheapestPrice,
 				highestPrice: highestPrice,
@@ -59,14 +60,14 @@ const HotelController = {
 				images,
 				isActive: true,
 			},
-			{
-				new: true,
-                useFindAndModify: false,
-			}
+				{
+					new: true,
+					useFindAndModify: false,
+				}
 			);
-            return res.status(200).json(hotel);
+			return res.status(200).json(hotel);
 		}
-		catch(error){
+		catch (error) {
 			return res.status(400).json({ error: error });
 		}
 	},
@@ -102,6 +103,62 @@ const HotelController = {
 			return res.status(400).json({ error: err });
 		}
 	},
+
+	async getHotelBySearch(req: Request, res: Response) {
+		try {
+			const { city, startDate, endDate, adult, children, roomNumber }: any = req.query
+			const totalPeople = parseInt(adult) + parseInt(children);
+			const roomNum = parseInt(roomNumber)
+			const people = Math.ceil(totalPeople / roomNum);
+			const hotels = await HotelSchema.find({ isActive: true, city });
+			const formatStart = new Date(startDate)
+			const formatEnd = new Date(endDate)
+
+
+			function isRoomAvailable(requestedStart: any, requestedEnd: any, bookings: any) {
+				if(bookings.length === 0) return false;
+				for (let booking of bookings) {
+					if(!booking){
+						return false;
+					}
+					let bookedStart = new Date(booking.start);
+					let bookedEnd = new Date(booking.end);
+					if (requestedStart <= bookedEnd && requestedEnd >= bookedStart) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			const availableHotels = [];
+			for (let hotel of hotels) {
+				const roomList = await Promise.all(
+					hotel!.rooms.map((roomId) => {
+						return RoomSchema.findById(roomId);
+					}),
+				);
+
+				// const availableRooms = roomList.filter(room => {
+				// 	return isRoomAvailable(formatStart, formatEnd, room?.bookings);
+				// });
+
+				const suitableRooms = roomList.filter(room => {
+					return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings);
+				});
+
+
+				if (suitableRooms.length >= roomNum ) {
+					availableHotels.push({
+						...hotel.toObject(),
+						rooms: suitableRooms,
+					});
+				}
+			}
+			res.status(200).json({ hotels: availableHotels });
+		} catch (error) {
+			return res.status(400).json({ error: error });
+		}
+	}
 
 };
 
