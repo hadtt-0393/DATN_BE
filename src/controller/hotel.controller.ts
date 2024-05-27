@@ -112,7 +112,6 @@ const HotelController = {
 			const people = Math.ceil(totalPeople / roomNum);
 			const hotels = await HotelSchema.find({ isActive: true, city });
 			const formatStart = new Date(startDate)
-			console.log(formatStart)
 			const formatEnd = new Date(endDate)
 
 

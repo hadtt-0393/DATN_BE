@@ -4,7 +4,7 @@ const route = Router();
 
 //auth with user
 route.post("/user/signin", AuthController.signinUser);
-route.post("/user/signup", AuthController.signinUser);
+route.post("/user/signup", AuthController.signupUser);
 
 //auth with staff
 route.post("/staff/signin", AuthController.signinStaff);

@@ -34,7 +34,7 @@ const AuthController = {
 
 	async signupUser(req: Request, res: Response) {
 		try {
-			const { username, email, password, phone, city, isStaff } = req.body;
+			const { username, email, password, phone, city } = req.body;
 			const user = await UserSchema.findByEmail(email);
 			if (user) {
 				return res
