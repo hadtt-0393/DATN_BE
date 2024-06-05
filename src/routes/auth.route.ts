@@ -11,4 +11,7 @@ route.post("/staff/signin", AuthController.signinStaff);
 route.post("/staff/signup", AuthController.signupStaff);
 
 
+//auth with admin
+route.post("/admin/signin", AuthController.signinAdmin);
+
 export default route;

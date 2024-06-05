@@ -48,7 +48,7 @@ const AuthController = {
 				email,
 				password: hashedPassword,
 				phone,
-                city,
+				city,
 			});
 			const { password: string, ...rest } = newUser.toObject();
 			const message = "Đăng ký tài khoản thành công";
@@ -100,11 +100,11 @@ const AuthController = {
 				email,
 				password: hashedPassword,
 				phone,
-                city,
+				city,
 			});
 
 			const newHotel = await HotelSchema.create({
-				username: username,
+				hotelName: username,
 				city: city,
 				owner: newStaff.id,
 				email: email,
@@ -120,12 +120,34 @@ const AuthController = {
 		}
 	},
 
+	async signinAdmin(req: Request, res: Response) {
+		try {
+			const { account, password } = req.body;
+			if (account === "admin" && password === "123456") {
+				const accessToken = AuthController.accessTokenAdmin('admin');
+				return res.status(200).json({ message: "Đăng nhập thành công", accessToken: accessToken});
+			}
+			else {
+				return res
+					.status(400)
+					.json({ message: "Bạn không phải là admin" });
+			}
+		} catch (err) {
+			return res.status(500).json({ message: err });
+		}
+	},
+
 	accessToken(user: any, role: string) {
 		return jwt.sign({ id: user._id, role: role }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: "1d",
 		});
 	},
 
+	accessTokenAdmin(role: string){
+		return jwt.sign({role: role}, process.env.ACCESS_TOKEN_SECRET!, {
+            expiresIn: "1d",
+        });
+	}
 };
 
 export default AuthController;

@@ -41,7 +41,7 @@ const FormSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
-    childrent: {
+    children: {
       type: Number,
       default: 0,
     },
@@ -65,4 +65,4 @@ const FormSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-module.exports = mongoose.model('Form', FormSchema);
+export default mongoose.model("form", FormSchema);
