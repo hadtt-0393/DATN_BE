@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const CitySchema = new mongoose.Schema(
   {
-    name: {
+    cityName: {
       type: String,
       required: true,
     },

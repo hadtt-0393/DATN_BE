@@ -15,9 +15,11 @@ const UserController = {
         return res.status(200).json(users);
     },
 
-    async isLogin(req: Request, res: Response) {
-        return res.status(200).json
-            ({ isLogin: true });
+    async isLogin(req: RequestWithUser, res: Response) {
+        const id = req.user.id;
+        const user = await UserSchema.findById(id);
+        const { password,...info } = user.toObject();
+        res.status(200).json(info);
     }
 };
 

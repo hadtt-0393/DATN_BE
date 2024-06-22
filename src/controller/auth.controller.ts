@@ -25,7 +25,7 @@ const AuthController = {
 				const accessToken = AuthController.accessToken(user, 'user');
 				const { password, ...info } = user.toObject();
 				const message = "Đăng nhập thành công";
-				return res.status(200).json({ info, accessToken, message });
+				return res.status(200).json({...info, accessToken, message});
 			}
 		} catch (err) {
 			return res.status(500).json({ message: err });

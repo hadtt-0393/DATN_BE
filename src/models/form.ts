@@ -8,28 +8,23 @@ const FormSchema = new mongoose.Schema(
     hotelId: {
       type: String,
     },
-    roomIds: {
+    rooms: {
       type: [String],
     },
     name: {
       type: String,
-      required: true,
     },
     address: {
       type: String,
-      required: true,
     },
     email: {
       type: String,
-      required: true,
     },
     phoneNumber: {
       type: String,
-      required: true,
     },
     price: {
       type: Number,
-      required: true,
     },
     startDate: { type: Date },
     endDate: { type: Date },
@@ -50,8 +45,7 @@ const FormSchema = new mongoose.Schema(
       default: '',
     },
     paymentStatus: {
-      type: Boolean,
-      default: false,
+      type: String,
     },
     rating: {
       type: Number,

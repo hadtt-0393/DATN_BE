@@ -4,15 +4,25 @@ import { Request, Response } from "express";
 import { Document } from "mongoose";
 import HotelSchema from "../models/hotel";
 import RoomSchema from "../models/room";
-
+import CitySchema from "../models/city";
+import { getQuantityRoomsIsActive } from "../utils/room";
 interface RequestWithUser extends Request {
 	user: any;
+}
+
+interface ParamsSearchHotel {
+	city: string;
+	startDate: string;
+	endDate: string;
+	adult: string;
+	children: string;
+	roomNumber: string;
 }
 
 const HotelController = {
 	async getHotelsByCity(req: Request, res: Response) {
 		try {
-			const { city } = req.query
+			const { city } = req.params
 			const hotels = await HotelSchema.find({ isActive: true, city });
 			return res.status(200).json(hotels);
 		} catch (error) {
@@ -106,56 +116,40 @@ const HotelController = {
 
 	async getHotelBySearch(req: Request, res: Response) {
 		try {
-			const { city, startDate, endDate, adult, children, roomNumber }: any = req.query
+			const { city, startDate, endDate, adult, children, roomNumber }: any = req.query;
+			const listHotelByCity = await CitySchema.findOne({ cityName: city });
+			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
 			if (!startDate && !endDate && !children && !adult && !roomNumber) {
-				const hotels = await HotelSchema.find({ isActive: true, city });
 				return res.status(200).json(hotels);
 			}
-			const totalPeople = parseInt(adult) + parseInt(children);
-			const roomNum = parseInt(roomNumber)
-			const people = Math.ceil(totalPeople / roomNum);
-			const hotels = await HotelSchema.find({ isActive: true, city });
-			const formatStart = new Date(startDate)
-			const formatEnd = new Date(endDate)
+			else {
+				const totalPeopleNum = parseInt(adult) + parseInt(children);
+				const roomNum = parseInt(roomNumber);
+				const hotelsFilter = await Promise.all(hotels.map(async (hotel) => {
+					const listRoomId = hotel.roomIds;
+					const listRoom = await RoomSchema.find({ _id: listRoomId });
 
-
-			function isRoomAvailable(requestedStart: any, requestedEnd: any, bookings: any) {
-				if (bookings.length === 0) return false;
-				for (let booking of bookings) {
-					if (!booking) {
-						return false;
+					let roomsAvailable = 0;
+					let positionAvailable = 0;
+					for (let room of listRoom) {
+						const activeRooms = getQuantityRoomsIsActive(room, startDate, endDate);
+						roomsAvailable += activeRooms;
+						positionAvailable += activeRooms * room.maxPeople;
 					}
-					let bookedStart = new Date(booking.start);
-					let bookedEnd = new Date(booking.end);
-					if (requestedStart <= bookedEnd && requestedEnd >= bookedStart) {
-						return false;
-					}
-				}
-				return true;
-			}
-
-			const availableHotels = [];
-			for (let hotel of hotels) {
-				const roomList = await Promise.all(
-					hotel!.rooms.map((roomId) => {
-						return RoomSchema.findById(roomId);
-					}),
-				);
-
-				const suitableRooms = roomList.filter(room => {
-					return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings);
-				});
-
-
-				if (suitableRooms.length >= roomNum) {
-					availableHotels.push({
-						...hotel.toObject(),
-						rooms: suitableRooms,
+					// Trả về true/false dựa trên điều kiện kiểm tra
+					return roomsAvailable >= roomNum && positionAvailable >= totalPeopleNum;
+				}));
+				const filteredHotels = hotels
+					.map((hotel, index) => ({ hotel, isSuitable: hotelsFilter[index] }))
+					.sort((a: any, b: any) => b.isSuitable - a.isSuitable)
+					.map(({ hotel, isSuitable }) => {
+						console.log(isSuitable)
+						return hotel
 					});
-				}
+				return res.status(200).json(filteredHotels);
 			}
-			res.status(200).json(availableHotels);
-		} catch (error) {
+		}
+		catch (error) {
 			return res.status(400).json({ error: error });
 		}
 	},
@@ -189,7 +183,7 @@ const HotelController = {
 			const availableHotels = [];
 			for (let hotel of hotels) {
 				const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
-				
+
 
 				if (serviceHotel && serviceHotel.length > 0) {
 					const hotelServices = hotel.services
@@ -206,7 +200,7 @@ const HotelController = {
 				}
 
 				const roomList = await Promise.all(
-					hotel!.rooms.map((roomId) => {
+					hotel!.roomIds.map((roomId) => {
 						return RoomSchema.findById(roomId);
 					}),
 				);

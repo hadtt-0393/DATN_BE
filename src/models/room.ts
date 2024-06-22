@@ -2,36 +2,32 @@ import mongoose from 'mongoose';
 
 const RoomSchema = new mongoose.Schema(
     {
-        roomNumber: {
+        roomType: {
             type: String,
+            required: true,
+        },
+        quantity: {
+            type: Number,
             required: true,
         },
         price: {
             type: Number,
             required: true,
         },
-        type: {
-            type: String,
-            required: true,
-        },
         services: {
             type: [String],
-            required: true,
-        },
-        max_person: {
-            type: Number,
             required: true,
         },
         image: {
             type: String,
             // required: true,
         },
-        description: {
-            type: String,
+        maxPeople: {
+            type: Number,
             required: true,
         },
-        status: {
-            type: Boolean,
+        description: {
+            type: String,
             required: true,
         },
         isDiscount: {

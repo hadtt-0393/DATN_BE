@@ -58,7 +58,7 @@ const HotelSchema = new mongoose.Schema(
       require: true,
       default: 0,
     },
-    rooms: {
+    roomIds: {
       type: [String],
       require: true,
     },
