@@ -1,7 +1,6 @@
 /** @format */
 
 import { Request, Response } from "express";
-import { Document } from "mongoose";
 import CitySchema from "../models/city";
 
 const CityController = {

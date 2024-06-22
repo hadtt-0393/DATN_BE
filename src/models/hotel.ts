@@ -62,7 +62,7 @@ const HotelSchema = new mongoose.Schema(
       type: [String],
       require: true,
     },
-    services: {
+    serviceIds: {
       type: [String],
       require: true,
     },
@@ -74,8 +74,7 @@ const HotelSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false
-    }
-
+    },
   },
   { timestamps: true },
 );

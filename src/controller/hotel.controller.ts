@@ -5,6 +5,8 @@ import { Document } from "mongoose";
 import HotelSchema from "../models/hotel";
 import RoomSchema from "../models/room";
 import CitySchema from "../models/city";
+import serviceHotelSchema from "../models/serviceHotel";
+import { getHotelsByService } from "../utils/hotel";
 import { getQuantityRoomsIsActive } from "../utils/room";
 interface RequestWithUser extends Request {
 	user: any;
@@ -114,13 +116,14 @@ const HotelController = {
 		}
 	},
 
-	async getHotelBySearch(req: Request, res: Response) {
+	async getHotelBySearch(req: Request, res: Response): Promise<any> {
 		try {
 			const { city, startDate, endDate, adult, children, roomNumber }: any = req.query;
 			const listHotelByCity = await CitySchema.findOne({ cityName: city });
 			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
 			if (!startDate && !endDate && !children && !adult && !roomNumber) {
-				return res.status(200).json(hotels);
+				const hotelsWithService = await getHotelsByService(hotels);
+				return res.status(200).json(hotelsWithService);
 			}
 			else {
 				const totalPeopleNum = parseInt(adult) + parseInt(children);
@@ -136,17 +139,17 @@ const HotelController = {
 						roomsAvailable += activeRooms;
 						positionAvailable += activeRooms * room.maxPeople;
 					}
-					// Trả về true/false dựa trên điều kiện kiểm tra
 					return roomsAvailable >= roomNum && positionAvailable >= totalPeopleNum;
 				}));
 				const filteredHotels = hotels
 					.map((hotel, index) => ({ hotel, isSuitable: hotelsFilter[index] }))
 					.sort((a: any, b: any) => b.isSuitable - a.isSuitable)
 					.map(({ hotel, isSuitable }) => {
-						console.log(isSuitable)
 						return hotel
 					});
-				return res.status(200).json(filteredHotels);
+				const FilteredHotelWithServices = await getHotelsByService(filteredHotels);
+
+				return res.status(200).json(FilteredHotelWithServices);
 			}
 		}
 		catch (error) {
@@ -157,84 +160,139 @@ const HotelController = {
 	async getHotelByFilter(req: Request, res: Response) {
 		try {
 			const { city, startDate, endDate, adult, children, roomNumber, serviceHotel, distance, serviceRoom, priceRange }: any = req.query;
-
-			const totalPeople = parseInt(adult) + parseInt(children);
+			const totalPeopleNum = parseInt(adult) + parseInt(children);
 			const roomNum = parseInt(roomNumber);
-			const people = Math.ceil(totalPeople / roomNum);
-			const hotels = await HotelSchema.find({ isActive: true, city });
-			const formatStart = new Date(startDate);
-			const formatEnd = new Date(endDate);
-
-			function isRoomAvailable(requestedStart: any, requestedEnd: any, bookings: any) {
-				if (bookings.length === 0) return true;
-				for (let booking of bookings) {
-					if (!booking) {
-						return true;
+			const serviceRoomArray = serviceRoom ? serviceRoom.split(',').map((service: any) => service.trim()) : [];
+			const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
+			const listHotelByCity = await CitySchema.findOne({ cityName: city });
+			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
+			let hotelAvailable = [];
+			const hotelsFilter = await Promise.all(hotels.map(async (hotel) => {
+				const listRoomId = hotel.roomIds;
+				const listRoom = await RoomSchema.find({ _id: listRoomId });
+				let roomsAvailable = 0;
+				let positionAvailable = 0;
+				let roomIdsAvailable = [];
+				for (let room of listRoom) {
+					const activeRooms = getQuantityRoomsIsActive(room, startDate, endDate);
+					if (activeRooms > 0) {
+						roomIdsAvailable.push(room._id);
 					}
-					let bookedStart = new Date(booking.start);
-					let bookedEnd = new Date(booking.end);
-					if (requestedStart <= bookedEnd && requestedEnd >= bookedStart) {
-						return false;
-					}
+					roomsAvailable += activeRooms;
+					positionAvailable += activeRooms * room.maxPeople;
 				}
-				return true;
+				return { ...hotel.toObject(), listRoomAvailable: roomIdsAvailable };
+			}));
+
+			const filterHotel = hotelsFilter.filter(hotel => hotel.listRoomAvailable.length > 0);
+
+			if (filterHotel.length === 0) {
+				return res.status(400).json({ error: 'Không tìm thấy khách sạn phù hợp' });
 			}
-
-			const availableHotels = [];
-			for (let hotel of hotels) {
-				const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
-
-
-				if (serviceHotel && serviceHotel.length > 0) {
-					const hotelServices = hotel.services
-					const hasAllHotelServices = serviceHotelArray.every((service: any) => hotelServices.includes(service));
-					if (!hasAllHotelServices) {
+			else {
+				for (let hotel of filterHotel) {
+					const hotelServices = hotel.serviceIds
+					const hotelHasAllService = serviceHotelArray.every((service: any) => hotelServices.includes(service));
+					if (!hotelHasAllService) {
 						continue;
 					}
+					else {
+						const roomAvailableIds = hotel.listRoomAvailable;
+						const roomList = await RoomSchema.find({ _id: roomAvailableIds });
+						const roomFilter = roomList.filter((room: any) => {
+							const roomHasAllService = serviceRoomArray.every((service: any) => room.serviceIds.includes(service))
+							return roomHasAllService;
+						})
+						if (roomFilter.length > 0) {
+							hotelAvailable.push(hotel);
+						}
+						else {
+							continue;
+						}
+					}
 				}
 
-				const distanceArray = distance ? distance.split(',').map((dist: string) => parseFloat(dist.trim())) : [];
-				const maxDistance = Math.max(...distanceArray);
-				if (distanceArray.length > 0 && hotel.distance >= maxDistance) {
-					continue;
-				}
-
-				const roomList = await Promise.all(
-					hotel!.roomIds.map((roomId) => {
-						return RoomSchema.findById(roomId);
-					}),
-				);
-
-				const serviceRoomArray = serviceRoom ? serviceRoom.split(',').map((service: any) => service.trim()) : [];
-				const priceRangeArray = priceRange ? priceRange.split(',').map((price: string) => parseFloat(price.trim())) : [];
-				const minPrice = priceRangeArray[0];
-				const maxPrice = priceRangeArray[1];
-
-
-
-				const suitableRooms = roomList.filter((room: any) => {
-					const roomServices = room.services
-					const hasAllRoomServices = serviceRoomArray.every((service: any) => roomServices.includes(service));
-					const isPriceInRange = priceRangeArray.length > 0 ? room.price >= minPrice && room.price <= maxPrice : true;
-					return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings) && hasAllRoomServices && isPriceInRange;
-				});
-
-				if (suitableRooms.length >= roomNum) {
-					availableHotels.push({
-						...hotel.toObject(),
-						rooms: suitableRooms,
-					});
-				}
+				return res.status(200).json(hotelAvailable)
 			}
-
-			return res.status(200).json({ hotels: availableHotels });
-
-		} catch (error) {
-			return res.status(400).json({ error: error });
 		}
+		catch (error) {
+			return res.status(400).json({ error: error });
+
+		}
+		// 	const totalPeopleNum = parseInt(adult) + parseInt(children);
+		// 	const roomNum = parseInt(roomNumber);
+		// 	const hotels = await HotelSchema.find({ isActive: true, city });
+		// 	const formatStart = new Date(startDate);
+		// 	const formatEnd = new Date(endDate);
+
+		// 	function isRoomAvailable(requestedStart: any, requestedEnd: any, bookings: any) {
+		// 		if (bookings.length === 0) return true;
+		// 		for (let booking of bookings) {
+		// 			if (!booking) {
+		// 				return true;
+		// 			}
+		// 			let bookedStart = new Date(booking.start);
+		// 			let bookedEnd = new Date(booking.end);
+		// 			if (requestedStart <= bookedEnd && requestedEnd >= bookedStart) {
+		// 				return false;
+		// 			}
+		// 		}
+		// 		return true;
+		// 	}
+
+		// 	const availableHotels = [];
+		// 	for (let hotel of hotels) {
+		// 		const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
+
+
+		// 		if (serviceHotel && serviceHotel.length > 0) {
+		// 			const hotelServices = hotel.services
+		// 			const hasAllHotelServices = serviceHotelArray.every((service: any) => hotelServices.includes(service));
+		// 			if (!hasAllHotelServices) {
+		// 				continue;
+		// 			}
+		// 		}
+
+		// 		const distanceArray = distance ? distance.split(',').map((dist: string) => parseFloat(dist.trim())) : [];
+		// 		const maxDistance = Math.max(...distanceArray);
+		// 		if (distanceArray.length > 0 && hotel.distance >= maxDistance) {
+		// 			continue;
+		// 		}
+
+		// 		const roomList = await Promise.all(
+		// 			hotel!.roomIds.map((roomId) => {
+		// 				return RoomSchema.findById(roomId);
+		// 			}),
+		// 		);
+
+		// 		const serviceRoomArray = serviceRoom ? serviceRoom.split(',').map((service: any) => service.trim()) : [];
+		// 		const priceRangeArray = priceRange ? priceRange.split(',').map((price: string) => parseFloat(price.trim())) : [];
+		// 		const minPrice = priceRangeArray[0];
+		// 		const maxPrice = priceRangeArray[1];
+
+
+
+		// 		const suitableRooms = roomList.filter((room: any) => {
+		// 			const roomServices = room.services
+		// 			const hasAllRoomServices = serviceRoomArray.every((service: any) => roomServices.includes(service));
+		// 			const isPriceInRange = priceRangeArray.length > 0 ? room.price >= minPrice && room.price <= maxPrice : true;
+		// 			return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings) && hasAllRoomServices && isPriceInRange;
+		// 		});
+
+		// 		if (suitableRooms.length >= roomNum) {
+		// 			availableHotels.push({
+		// 				...hotel.toObject(),
+		// 				rooms: suitableRooms,
+		// 			});
+		// 		}
+		// 	}
+
+		// 	return res.status(200).json({ hotels: availableHotels });
+
+		// } catch (error) {
+		// 	return res.status(400).json({ error: error });
+		// }
 	}
-
-
 };
 
 export default HotelController;
