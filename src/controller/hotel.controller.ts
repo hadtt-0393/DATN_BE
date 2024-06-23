@@ -6,7 +6,7 @@ import HotelSchema from "../models/hotel";
 import RoomSchema from "../models/room";
 import CitySchema from "../models/city";
 import serviceHotelSchema from "../models/serviceHotel";
-import { getHotelsByService } from "../utils/hotel";
+import { getHotelsByService, getHotelsByServiceVer2 } from "../utils/hotel";
 import { getQuantityRoomsIsActive } from "../utils/room";
 interface RequestWithUser extends Request {
 	user: any;
@@ -36,7 +36,10 @@ const HotelController = {
 		try {
 			const id = req.params.id;
 			const hotel = await HotelSchema.findById(id);
-			return res.status(200).json(hotel);
+			const services = await serviceHotelSchema.find({ _id: { $in: hotel!.serviceIds } })
+			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName) };
+
+			return res.status(200).json(hotelService);
 		}
 		catch (error) {
 			return res.status(400).json({ error: error });
@@ -166,7 +169,7 @@ const HotelController = {
 			const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
 			const listHotelByCity = await CitySchema.findOne({ cityName: city });
 			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
-			let hotelAvailable = [];
+			let hotelAvailable = [] as any;
 			const hotelsFilter = await Promise.all(hotels.map(async (hotel) => {
 				const listRoomId = hotel.roomIds;
 				const listRoom = await RoomSchema.find({ _id: listRoomId });
@@ -183,9 +186,7 @@ const HotelController = {
 				}
 				return { ...hotel.toObject(), listRoomAvailable: roomIdsAvailable };
 			}));
-
 			const filterHotel = hotelsFilter.filter(hotel => hotel.listRoomAvailable.length > 0);
-
 			if (filterHotel.length === 0) {
 				return res.status(400).json({ error: 'Không tìm thấy khách sạn phù hợp' });
 			}
@@ -211,8 +212,8 @@ const HotelController = {
 						}
 					}
 				}
-
-				return res.status(200).json(hotelAvailable)
+				const ResultFilterByService = await getHotelsByServiceVer2(hotelAvailable);
+				return res.status(200).json(ResultFilterByService)
 			}
 		}
 		catch (error) {
