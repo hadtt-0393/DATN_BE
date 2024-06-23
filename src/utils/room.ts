@@ -1,3 +1,9 @@
+import serviceRoomSchema from "../models/serviceRoom";
+interface Room {
+    serviceIds: string[];
+    toObject: () => any;
+};
+
 function getQuantityRoomsIsActive(room: any, start: any, end: any) {
     const startTime = new Date(start);
     const endTime = new Date(end);
@@ -17,4 +23,15 @@ function getQuantityRoomsIsActive(room: any, start: any, end: any) {
     }
 }
 
-export { getQuantityRoomsIsActive };
+async function getRoomsByService(rooms: Room[]) {
+    const resultRooms = await Promise.all(rooms.map(async (room) => {
+        const services = await serviceRoomSchema.find({ _id: { $in: room.serviceIds } })
+        return {
+            ...room.toObject(),
+            services: services.map(item => item.serviceName)
+        };
+    }))
+    return resultRooms;
+}
+
+export { getQuantityRoomsIsActive, getRoomsByService }

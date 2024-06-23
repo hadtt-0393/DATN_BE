@@ -4,6 +4,9 @@ import { Request, Response } from "express";
 import HotelSchema from "../models/hotel"
 import RoomSchema from "../models/room";
 import { generateCombinationDFS } from "../utils/search";
+import { getQuantityRoomsIsActive, getRoomsByService } from "../utils/room";
+import { getRoomsByBed } from "../utils/bed";
+import { totalmem } from "os";
 
 interface RequestWithUser extends Request {
 	user: any;
@@ -93,26 +96,6 @@ const RoomController = {
 		}
 	},
 
-
-	getQuantityRoomsIsActive(room: any, start: any, end: any) {
-		const startTime = new Date(start);
-		const endTime = new Date(end);
-		if (room.bookings.length === 0) {
-			return room.quantity;
-		}
-		else {
-			let quantity = room.quantity;
-			for (let booking of room.bookings) {
-				let bookedStart = new Date(booking.start);
-				let bookedEnd = new Date(booking.end);
-				if (startTime <= bookedEnd && endTime >= bookedStart) {
-					quantity--;
-				}
-			}
-			return quantity;
-		}
-	},
-
 	async getAllRoomFilter(req: Request, res: Response) {
 		try {
 			const id = req.params.id;
@@ -121,18 +104,41 @@ const RoomController = {
 			const roomNum = parseInt(roomNumber);
 			const hotel = await HotelSchema.findById(id);
 			let roomList = await RoomSchema.find({ _id: hotel?.roomIds });
-			roomList = roomList.map((room) => ({ ...room.toJSON(), quantity: RoomController.getQuantityRoomsIsActive(room!, startDate, endDate) }));
+			roomList = roomList.map((room) => ({ ...room.toJSON(), quantity: getQuantityRoomsIsActive(room!, startDate, endDate) }));
 			const resultSearch = generateCombinationDFS(roomList, totalPeople, roomNum);
 			res.json(resultSearch);
 		}
 		catch (error) {
 			console.log(error);
 		}
+	},
+
+	async getAllRoomAvailable(req: Request, res: Response) {
+		try {
+			const id = req.params.id;
+			const { startDate, endDate }: any = req.query;
+			const hotel = await HotelSchema.findById(id);
+			const listIdRoom = hotel?.roomIds;
+			const listRoom = await RoomSchema.find({ _id: listIdRoom });
+			const roomFilter = listRoom
+				.filter((room) => {
+					const activeRooms = getQuantityRoomsIsActive(room, startDate, endDate);
+					return activeRooms > 0;
+				})
+
+			const resultRoomByService = await getRoomsByService(roomFilter);
+			const resultRoomByBed = await getRoomsByBed(resultRoomByService)
+			const resultRoomAvailable = resultRoomByBed.map((room) => {
+				const quantityAvailable = getQuantityRoomsIsActive(room, startDate, endDate);
+				return { ...room, quantityAvailable}
+			})
+
+			return res.status(200).json(resultRoomAvailable);
+		}
+		catch (error) {
+			res.status(400).json({ error: error });
+		}
 	}
-
-
-
-
 
 };
 

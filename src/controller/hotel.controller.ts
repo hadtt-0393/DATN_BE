@@ -102,7 +102,8 @@ const HotelController = {
 			const top10Rating = await HotelSchema.find({ isActive: true })
 				.sort({ ratingAvg: -1 })
 				.limit(10);
-			return res.status(200).json(top10Rating);
+			const result = await getHotelsByService(top10Rating);
+			return res.status(200).json(result);
 		} catch (err) {
 			return res.status(400).json({ error: err });
 		}
@@ -113,7 +114,8 @@ const HotelController = {
 			const top10Newest = await HotelSchema.find({ isActive: true })
 				.sort({ createdAt: -1 })
 				.limit(10);
-			return res.status(200).json(top10Newest);
+			const result = await getHotelsByService(top10Newest);
+			return res.status(200).json(result);
 		} catch (err) {
 			return res.status(400).json({ error: err });
 		}
@@ -122,38 +124,29 @@ const HotelController = {
 	async getHotelBySearch(req: Request, res: Response): Promise<any> {
 		try {
 			const { city, startDate, endDate, adult, children, roomNumber }: any = req.query;
-			const listHotelByCity = await CitySchema.findOne({ cityName: city });
-			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
-			if (!startDate && !endDate && !children && !adult && !roomNumber) {
-				const hotelsWithService = await getHotelsByService(hotels);
-				return res.status(200).json(hotelsWithService);
-			}
-			else {
-				const totalPeopleNum = parseInt(adult) + parseInt(children);
-				const roomNum = parseInt(roomNumber);
-				const hotelsFilter = await Promise.all(hotels.map(async (hotel) => {
-					const listRoomId = hotel.roomIds;
-					const listRoom = await RoomSchema.find({ _id: listRoomId });
+			const totalPeopleNum = parseInt(adult) + parseInt(children);
+			const roomNum = parseInt(roomNumber);
+			const City = await CitySchema.findOne({ cityName: city });
+			const listHotelByCity = await HotelSchema.find({ _id: City?.hotelIds })
 
-					let roomsAvailable = 0;
-					let positionAvailable = 0;
-					for (let room of listRoom) {
-						const activeRooms = getQuantityRoomsIsActive(room, startDate, endDate);
-						roomsAvailable += activeRooms;
-						positionAvailable += activeRooms * room.maxPeople;
-					}
-					return roomsAvailable >= roomNum && positionAvailable >= totalPeopleNum;
-				}));
-				const filteredHotels = hotels
-					.map((hotel, index) => ({ hotel, isSuitable: hotelsFilter[index] }))
-					.sort((a: any, b: any) => b.isSuitable - a.isSuitable)
-					.map(({ hotel, isSuitable }) => {
-						return hotel
-					});
-				const FilteredHotelWithServices = await getHotelsByService(filteredHotels);
+			//Mảng hotel sau khi map xong trả ra kết quả mảng boolean theo thứ tự của từng hotel
+			const hotelsMapBoolean = await Promise.all(listHotelByCity.map(async (hotel) => {
+				const listRoomId = hotel.roomIds;
+				const listRoom = await RoomSchema.find({ _id: listRoomId });
+				let totalRoomAvailable = 0;
+				let totalPositionAvailable = 0;
+				for (let room of listRoom) {
+					const quantityRoomActive = getQuantityRoomsIsActive(room, startDate, endDate);
+					totalRoomAvailable += quantityRoomActive;
+					totalPositionAvailable += quantityRoomActive * room.maxPeople;
+				}
+				return totalRoomAvailable >= roomNum && totalPositionAvailable >= totalPeopleNum;
+			}));
 
-				return res.status(200).json(FilteredHotelWithServices);
-			}
+			//Filter hotel by [index] hotelsMapBoolean 
+			const filterHotel = listHotelByCity.filter((hotel, index) => hotelsMapBoolean[index]);
+			const resultHotel = await getHotelsByService(filterHotel);
+			return res.status(200).json(resultHotel);
 		}
 		catch (error) {
 			return res.status(400).json({ error: error });
@@ -166,43 +159,60 @@ const HotelController = {
 			const totalPeopleNum = parseInt(adult) + parseInt(children);
 			const roomNum = parseInt(roomNumber);
 			const serviceRoomArray = serviceRoom ? serviceRoom.split(',').map((service: any) => service.trim()) : [];
+			const distanceArray = distance ? distance.split(',').map((dist: string) => parseFloat(dist.trim())) : [];
 			const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
-			const listHotelByCity = await CitySchema.findOne({ cityName: city });
-			const hotels = await HotelSchema.find({ _id: listHotelByCity?.hotelIds })
+			const priceRangeArray = priceRange ? priceRange.split(',').map((price: string) => parseFloat(price.trim())) : [];
+			const City = await CitySchema.findOne({ cityName: city });
+			const listHotelByCity = await HotelSchema.find({ _id: City?.hotelIds })
 			let hotelAvailable = [] as any;
-			const hotelsFilter = await Promise.all(hotels.map(async (hotel) => {
+			const hotelsFilter = await Promise.all(listHotelByCity.map(async (hotel) => {
 				const listRoomId = hotel.roomIds;
 				const listRoom = await RoomSchema.find({ _id: listRoomId });
-				let roomsAvailable = 0;
-				let positionAvailable = 0;
+				let totalRoomAvailable = 0;
+				let totalPositionAvailable = 0;
 				let roomIdsAvailable = [];
 				for (let room of listRoom) {
-					const activeRooms = getQuantityRoomsIsActive(room, startDate, endDate);
-					if (activeRooms > 0) {
+					const quantityRoomActive = getQuantityRoomsIsActive(room, startDate, endDate);
+					if (quantityRoomActive > 0) {
 						roomIdsAvailable.push(room._id);
 					}
-					roomsAvailable += activeRooms;
-					positionAvailable += activeRooms * room.maxPeople;
+					totalRoomAvailable += quantityRoomActive;
+					totalPositionAvailable += quantityRoomActive * room.maxPeople;
 				}
-				return { ...hotel.toObject(), listRoomAvailable: roomIdsAvailable };
+				return { ...hotel.toObject(), listRoomAvailable: roomIdsAvailable, isAvailable: totalRoomAvailable >= roomNum && totalPositionAvailable >= totalPeopleNum };
 			}));
-			const filterHotel = hotelsFilter.filter(hotel => hotel.listRoomAvailable.length > 0);
+
+
+			const filterHotel = hotelsFilter.filter((hotel, index) => hotel.isAvailable);
 			if (filterHotel.length === 0) {
-				return res.status(400).json({ error: 'Không tìm thấy khách sạn phù hợp' });
+				return res.status(200).json([]);
 			}
 			else {
 				for (let hotel of filterHotel) {
 					const hotelServices = hotel.serviceIds
 					const hotelHasAllService = serviceHotelArray.every((service: any) => hotelServices.includes(service));
+					if (distanceArray.length > 0) {
+						const maxDistance = Math.max(...distanceArray);
+						if (hotel.distance > maxDistance) {
+							continue;
+						}
+					}
 					if (!hotelHasAllService) {
 						continue;
 					}
 					else {
+						let minPrice = 0;
+						let maxPrice = 0;
+						if (priceRangeArray.length > 0) {
+							minPrice = priceRangeArray[0];
+							maxPrice = priceRangeArray[1];
+						}
 						const roomAvailableIds = hotel.listRoomAvailable;
 						const roomList = await RoomSchema.find({ _id: roomAvailableIds });
 						const roomFilter = roomList.filter((room: any) => {
 							const roomHasAllService = serviceRoomArray.every((service: any) => room.serviceIds.includes(service))
-							return roomHasAllService;
+							const isRoomComforPrice = room.price >= minPrice && room.price <= maxPrice;
+							return roomHasAllService && isRoomComforPrice;
 						})
 						if (roomFilter.length > 0) {
 							hotelAvailable.push(hotel);

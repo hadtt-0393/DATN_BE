@@ -14,7 +14,7 @@ const RoomSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        services: {
+        serviceIds: {
             type: [String],
             required: true,
         },
@@ -34,6 +34,10 @@ const RoomSchema = new mongoose.Schema(
             type: Number,
         },
         bookings: {
+            type: Array,
+            default: [],
+        },
+        beds: {
             type: Array,
             default: [],
         }
