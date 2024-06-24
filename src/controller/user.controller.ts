@@ -17,9 +17,15 @@ const UserController = {
 
     async isLogin(req: RequestWithUser, res: Response) {
         const id = req.user.id;
-        const user = await UserSchema.findById(id);
-        const { password,...info } = user.toObject();
-        res.status(200).json(info);
+        try {
+            const user = await UserSchema.findById(id);
+            const { password,...info } = user.toObject();
+            res.status(200).json(info);
+        }
+        catch(err){
+            console.log(err);
+            return res.status(400).json({error: err});
+        }
     }
 };
 

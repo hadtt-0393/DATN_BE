@@ -9,10 +9,13 @@ const FormSchema = new mongoose.Schema(
       type: String,
     },
     rooms: {
-      type: [String],
+      type: [Object],
     },
     name: {
       type: String,
+    },
+    cost: {
+      type: Number,
     },
     address: {
       type: String,
@@ -34,11 +37,9 @@ const FormSchema = new mongoose.Schema(
     },
     adults: {
       type: Number,
-      default: 1,
     },
     children: {
       type: Number,
-      default: 0,
     },
     note:{
       type: String,

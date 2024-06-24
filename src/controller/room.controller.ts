@@ -75,17 +75,16 @@ const RoomController = {
 		try {
 			const id = req.user.id;
 			console.log(id)
-			const { roomNumber, price, type, description, image, max_person, service } = req.body;
+			const { roomType, price, quantity, description, image, maxPeople, services } = req.body;
 			const hotel = await HotelSchema.findOne({ owner: id });
 			const room = new RoomSchema({
-				roomNumber: roomNumber,
-				price: price,
-				type: type,
-				description: description,
+				roomType,
+				quantity,
+				price,
+				description,
 				image: image,
-				max_person: max_person,
-				status: true,
-				services: service
+				maxPeople,
+				serviceIds: services,
 			});
 			await room.save();
 			hotel!.roomIds.push(room.id);
