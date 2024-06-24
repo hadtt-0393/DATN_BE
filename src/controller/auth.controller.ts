@@ -137,6 +137,12 @@ const AuthController = {
 		}
 	},
 
+	async isLogin(req: Request, res: Response) {
+        return res.status(200).json
+            ({ isLogin: true });
+    },
+
+
 	accessToken(user: any, role: string) {
 		return jwt.sign({ id: user._id, role: role }, process.env.ACCESS_TOKEN_SECRET!, {
 			expiresIn: "1d",

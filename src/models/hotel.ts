@@ -26,14 +26,6 @@ const HotelSchema = new mongoose.Schema(
       type: [String],
       require: true,
     },
-    cheapestPrice: {
-      type: Number,
-      require: true,
-    },
-    highestPrice: {
-      type: Number,
-      require: true,
-    },
     city: {
       type: String,
       required: true,

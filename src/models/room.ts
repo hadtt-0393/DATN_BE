@@ -30,9 +30,6 @@ const RoomSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        isDiscount: {
-            type: Number,
-        },
         bookings: {
             type: Array,
             default: [],

@@ -34,4 +34,15 @@ async function getRoomsByService(rooms: Room[]) {
     return resultRooms;
 }
 
-export { getQuantityRoomsIsActive, getRoomsByService }
+async function getRoomsByServiceVer2(rooms: Room[]) {
+    const resultRooms = await Promise.all(rooms.map(async (room) => {
+        const services = await serviceRoomSchema.find({ _id: { $in: room.serviceIds } })
+        return {
+            ...room,
+            services: services.map(item => item.serviceName)
+        };
+    }))
+    return resultRooms;
+}
+
+export { getQuantityRoomsIsActive, getRoomsByService, getRoomsByServiceVer2 }

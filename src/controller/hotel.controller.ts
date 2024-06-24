@@ -60,20 +60,16 @@ const HotelController = {
 
 	async updateHotel(req: RequestWithUser, res: Response) {
 		try {
-			const { distance, description, hotelName, city, cheapestPrice, highestPrice, discount, address, services, images } = req.body;
+			const { distance, description, hotelName, discount, address, serviceIds, images } = req.body;
 			const id = req.user.id;
 			const hotel = await HotelSchema.findOneAndUpdate({ owner: id }, {
-				distance: distance,
-				description: description,
 				hotelName: hotelName,
-				city: city,
 				address: address,
-				cheapestPrice: cheapestPrice,
-				highestPrice: highestPrice,
+				distance: distance,
+				description: description,	
 				discount: discount,
-				services,
+				serviceIds,
 				images,
-				isActive: true,
 			},
 				{
 					new: true,
@@ -94,7 +90,6 @@ const HotelController = {
 		} catch (error) {
 			return res.status(400).json({ error: error });
 		}
-
 	},
 
 	async getTopTenRating(req: Request, res: Response) {
@@ -211,7 +206,7 @@ const HotelController = {
 						const roomList = await RoomSchema.find({ _id: roomAvailableIds });
 						const roomFilter = roomList.filter((room: any) => {
 							const roomHasAllService = serviceRoomArray.every((service: any) => room.serviceIds.includes(service))
-							const isRoomComforPrice = room.price >= minPrice && room.price <= maxPrice;
+							const isRoomComforPrice = priceRangeArray.length > 0 ? room.price >= minPrice && room.price <= maxPrice : true;
 							return roomHasAllService && isRoomComforPrice;
 						})
 						if (roomFilter.length > 0) {
