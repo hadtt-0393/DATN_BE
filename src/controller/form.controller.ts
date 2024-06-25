@@ -97,7 +97,6 @@ const FormControler = {
         try {
             const id = req.user.id;
             const hotel = await HotelSchema.findOne({ owner: id });
-            console.log(hotel)
             const hotelId = hotel?._id;
             const listForm = await FormSchema.find({ hotelId });
             let result = await FormControler.convertForm(listForm);

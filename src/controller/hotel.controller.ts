@@ -5,6 +5,7 @@ import { Document } from "mongoose";
 import HotelSchema from "../models/hotel";
 import RoomSchema from "../models/room";
 import CitySchema from "../models/city";
+import serviceRoomSchema from "../models/serviceRoom";
 import serviceHotelSchema from "../models/serviceHotel";
 import { getHotelsByService, getHotelsByServiceVer2 } from "../utils/hotel";
 import { getQuantityRoomsIsActive } from "../utils/room";
@@ -36,7 +37,7 @@ const HotelController = {
 		try {
 			const id = req.params.id;
 			const hotel = await HotelSchema.findById(id);
-			const services = await serviceHotelSchema.find({ _id: { $in: hotel!.serviceIds } })
+			const services = await serviceRoomSchema.find({ _id: { $in: hotel!.serviceIds } })
 			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName) };
 
 			return res.status(200).json(hotelService);
@@ -85,8 +86,20 @@ const HotelController = {
 
 	async getAllHotel(req: Request, res: Response) {
 		try {
-			const Hotels = await HotelSchema.find({ isActive: true })
-			return res.status(200).json(Hotels);
+			let hotels = await HotelSchema.find({ isActive: true })
+			hotels = await Promise.all(hotels.map(async(hotel: any) => {
+				let listRoomId = hotel.roomIds;
+				const listServiceHotel = hotel.serviceIds;
+				const serviceHotel = await serviceHotelSchema.find({_id: {$in: listServiceHotel}})
+				let rooms = await RoomSchema.find({_id: listRoomId});
+				rooms = await Promise.all(rooms.map(async(room: any) => {
+					const listServiceRoom = room.serviceIds;
+					const services = await serviceRoomSchema.find({ _id: { $in: listServiceRoom } })
+					return {...room.toJSON(), services: services.map(item => item.serviceName) };
+				}))
+				return {...hotel.toJSON(), rooms, services: serviceHotel.map(item => item.serviceName)};
+			}))
+			return res.status(200).json(hotels);
 		} catch (error) {
 			return res.status(400).json({ error: error });
 		}

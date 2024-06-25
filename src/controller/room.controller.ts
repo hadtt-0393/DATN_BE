@@ -39,9 +39,9 @@ const RoomController = {
 					return RoomSchema.findById(roomId);
 				}),
 			);
-			roomList = roomList.map((room: any) => ({ ...room.toJSON(), quantityAvailable: getQuantityRoomsIsActive(room!, start, end)}));
+			roomList = roomList.map((room: any) => ({ ...room.toJSON(), quantityAvailable: getQuantityRoomsIsActive(room!, start, end) }));
 			res.status(200).json(roomList);
-		} 
+		}
 		catch (error) {
 			return res.status(400).json({ error: error });
 		}
@@ -104,7 +104,7 @@ const RoomController = {
 			const roomNum = parseInt(roomNumber);
 			const hotel = await HotelSchema.findById(id);
 			let roomList = await RoomSchema.find({ _id: hotel?.roomIds });
-			roomList = roomList.map((room) => ({ ...room.toJSON(), quantity: getQuantityRoomsIsActive(room!, startDate, endDate), quantityAvailable: getQuantityRoomsIsActive(room!, startDate, endDate)}));
+			roomList = roomList.map((room) => ({ ...room.toJSON(), quantity: getQuantityRoomsIsActive(room!, startDate, endDate), quantityAvailable: getQuantityRoomsIsActive(room!, startDate, endDate) }));
 			const roomService = await getRoomsByServiceVer2(roomList) as any;
 			const roomBed = await getRoomsByBed(roomService) as any;
 			const resultSearch = generateCombinationDFS(roomBed, totalPeople, roomNum);

@@ -3,7 +3,7 @@ import HotelController from "../controller/hotel.controller";
 import middlewareToken from "../middleware/verifyToken";
 const route = Router();
 
-route.get("/getAllHotel", HotelController.getAllHotel);         //lay ra toan bo hotel isActive
+route.get("/getAllHotel", middlewareToken.verifyToken as any, middlewareToken.verifyAdmin as any, HotelController.getAllHotel as any);         //lay ra toan bo hotel isActive
 route.get("/getHotelByCity/:city", HotelController.getHotelsByCity);           // lay ra hotel by city             //ver2 - 18/06
 route.get("/topTenRating", HotelController.getTopTenRating);    // lay ra top10 hotel by Rating
 route.get("/topTenNewest", HotelController.getTopTenNewest);    // lay ra top10 hotel theo thoi gian tao
