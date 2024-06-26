@@ -37,7 +37,7 @@ const HotelController = {
 		try {
 			const id = req.params.id;
 			const hotel = await HotelSchema.findById(id);
-			const services = await serviceRoomSchema.find({ _id: { $in: hotel!.serviceIds } })
+			const services = await serviceHotelSchema.find({ _id: { $in: hotel!.serviceIds } })
 			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName) };
 
 			return res.status(200).json(hotelService);
