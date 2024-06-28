@@ -27,7 +27,11 @@ const HotelController = {
 		try {
 			const { city } = req.params
 			const hotels = await HotelSchema.find({ isActive: true, city });
+			console.log(city);
+			
+			console.log("tim kiem h city", hotels.length);
 			return res.status(200).json(hotels);
+			
 		} catch (error) {
 			return res.status(400).json({ error: error });
 		}
