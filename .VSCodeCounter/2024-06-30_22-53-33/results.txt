@@ -1,0 +1,69 @@
+Date : 2024-06-30 22:53:33
+Directory : c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src
+Total : 37 files,  1363 codes, 14 comments, 180 blanks, all 1557 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| TypeScript |         37 |      1,363 |         14 |        180 |      1,557 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                              | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                 |         37 |      1,363 |         14 |        180 |      1,557 |
+| . (Files)                                                                         |          1 |         17 |          0 |          4 |         21 |
+| config                                                                            |          2 |         13 |          0 |          0 |         13 |
+| controller                                                                        |          9 |        722 |         10 |         97 |        829 |
+| middleware                                                                        |          1 |         48 |          0 |          6 |         54 |
+| models                                                                            |          9 |        295 |          1 |         28 |        324 |
+| routes                                                                            |         10 |         96 |          3 |         31 |        130 |
+| types                                                                             |          1 |          1 |          0 |          0 |          1 |
+| utils                                                                             |          4 |        171 |          0 |         14 |        185 |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                          | language   | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\config\db.ts                          | TypeScript |         12 |          0 |          0 |         12 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\config\index.ts                       | TypeScript |          1 |          0 |          0 |          1 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\auth.controller.ts         | TypeScript |        142 |          1 |         17 |        160 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\city.controller.ts         | TypeScript |         13 |          1 |          5 |         19 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\form.controller.ts         | TypeScript |        101 |          0 |         11 |        112 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\hotel.controller.ts        | TypeScript |        225 |          3 |         22 |        250 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\room.controller.ts         | TypeScript |        133 |          1 |         14 |        148 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\serviceHotel.controller.ts | TypeScript |         13 |          1 |          6 |         20 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\serviceRoom.controller.ts  | TypeScript |         13 |          1 |          6 |         20 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\staff.controller.ts        | TypeScript |         38 |          1 |          9 |         48 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\controller\user.controller.ts         | TypeScript |         44 |          1 |          7 |         52 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\middleware\verifyToken.ts             | TypeScript |         48 |          0 |          6 |         54 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\bed.ts                         | TypeScript |         10 |          0 |          3 |         13 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\city.ts                        | TypeScript |         22 |          0 |          3 |         25 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\form.ts                        | TypeScript |         61 |          0 |          3 |         64 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\hotel.ts                       | TypeScript |         73 |          0 |          3 |         76 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\room.ts                        | TypeScript |         42 |          1 |          3 |         46 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\serviceHotel.ts                | TypeScript |         10 |          0 |          3 |         13 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\serviceRoom.ts                 | TypeScript |         10 |          0 |          3 |         13 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\staff.ts                       | TypeScript |         29 |          0 |          3 |         32 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\models\user.ts                        | TypeScript |         38 |          0 |          4 |         42 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\auth.route.ts                  | TypeScript |         11 |          3 |          6 |         20 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\city.route.ts                  | TypeScript |          5 |          0 |          3 |          8 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\form.route.ts                  | TypeScript |          8 |          0 |          3 |         11 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\hotel.route.ts                 | TypeScript |         14 |          0 |          3 |         17 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\index.ts                       | TypeScript |         22 |          0 |          3 |         25 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\room.route.ts                  | TypeScript |         11 |          0 |          3 |         14 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\serviceHotel.route.ts          | TypeScript |          5 |          0 |          3 |          8 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\serviceRoom.route.ts           | TypeScript |          5 |          0 |          3 |          8 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\staff.route.ts                 | TypeScript |          8 |          0 |          2 |         10 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\routes\user.route.ts                  | TypeScript |          7 |          0 |          2 |          9 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\server.ts                             | TypeScript |         17 |          0 |          4 |         21 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\types\index.ts                        | TypeScript |          1 |          0 |          0 |          1 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\utils\bed.ts                          | TypeScript |         28 |          0 |          4 |         32 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\utils\hotel.ts                        | TypeScript |         27 |          0 |          3 |         30 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\utils\room.ts                         | TypeScript |         44 |          0 |          4 |         48 |
+| c:\Users\ASUS\OneDrive\Máy tính\DATN_BE\src\utils\search.ts                       | TypeScript |         72 |          0 |          3 |         75 |
+| Total                                                                             |            |      1,363 |         14 |        180 |      1,557 |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

@@ -226,6 +226,7 @@ const HotelController = {
 							const isRoomComforPrice = priceRangeArray.length > 0 ? room.price >= minPrice && room.price <= maxPrice : true;
 							return roomHasAllService && isRoomComforPrice;
 						})
+						console.log(roomFilter);
 						if (roomFilter.length > 0) {
 							hotelAvailable.push(hotel);
 						}
@@ -242,79 +243,6 @@ const HotelController = {
 			return res.status(400).json({ error: error });
 
 		}
-		// 	const totalPeopleNum = parseInt(adult) + parseInt(children);
-		// 	const roomNum = parseInt(roomNumber);
-		// 	const hotels = await HotelSchema.find({ isActive: true, city });
-		// 	const formatStart = new Date(startDate);
-		// 	const formatEnd = new Date(endDate);
-
-		// 	function isRoomAvailable(requestedStart: any, requestedEnd: any, bookings: any) {
-		// 		if (bookings.length === 0) return true;
-		// 		for (let booking of bookings) {
-		// 			if (!booking) {
-		// 				return true;
-		// 			}
-		// 			let bookedStart = new Date(booking.start);
-		// 			let bookedEnd = new Date(booking.end);
-		// 			if (requestedStart <= bookedEnd && requestedEnd >= bookedStart) {
-		// 				return false;
-		// 			}
-		// 		}
-		// 		return true;
-		// 	}
-
-		// 	const availableHotels = [];
-		// 	for (let hotel of hotels) {
-		// 		const serviceHotelArray = serviceHotel ? serviceHotel.split(',').map((service: any) => service.trim()) : [];
-
-
-		// 		if (serviceHotel && serviceHotel.length > 0) {
-		// 			const hotelServices = hotel.services
-		// 			const hasAllHotelServices = serviceHotelArray.every((service: any) => hotelServices.includes(service));
-		// 			if (!hasAllHotelServices) {
-		// 				continue;
-		// 			}
-		// 		}
-
-		// 		const distanceArray = distance ? distance.split(',').map((dist: string) => parseFloat(dist.trim())) : [];
-		// 		const maxDistance = Math.max(...distanceArray);
-		// 		if (distanceArray.length > 0 && hotel.distance >= maxDistance) {
-		// 			continue;
-		// 		}
-
-		// 		const roomList = await Promise.all(
-		// 			hotel!.roomIds.map((roomId) => {
-		// 				return RoomSchema.findById(roomId);
-		// 			}),
-		// 		);
-
-		// 		const serviceRoomArray = serviceRoom ? serviceRoom.split(',').map((service: any) => service.trim()) : [];
-		// 		const priceRangeArray = priceRange ? priceRange.split(',').map((price: string) => parseFloat(price.trim())) : [];
-		// 		const minPrice = priceRangeArray[0];
-		// 		const maxPrice = priceRangeArray[1];
-
-
-
-		// 		const suitableRooms = roomList.filter((room: any) => {
-		// 			const roomServices = room.services
-		// 			const hasAllRoomServices = serviceRoomArray.every((service: any) => roomServices.includes(service));
-		// 			const isPriceInRange = priceRangeArray.length > 0 ? room.price >= minPrice && room.price <= maxPrice : true;
-		// 			return room && room.max_person >= people && isRoomAvailable(formatStart, formatEnd, room.bookings) && hasAllRoomServices && isPriceInRange;
-		// 		});
-
-		// 		if (suitableRooms.length >= roomNum) {
-		// 			availableHotels.push({
-		// 				...hotel.toObject(),
-		// 				rooms: suitableRooms,
-		// 			});
-		// 		}
-		// 	}
-
-		// 	return res.status(200).json({ hotels: availableHotels });
-
-		// } catch (error) {
-		// 	return res.status(400).json({ error: error });
-		// }
 	}
 };
 
