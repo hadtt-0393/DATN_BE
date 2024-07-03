@@ -9,6 +9,8 @@ import serviceRoomSchema from "../models/serviceRoom";
 import serviceHotelSchema from "../models/serviceHotel";
 import { getHotelsByService, getHotelsByServiceVer2 } from "../utils/hotel";
 import { getQuantityRoomsIsActive } from "../utils/room";
+import FormSchema from "../models/form";
+import UserSchema from "../models/user";
 interface RequestWithUser extends Request {
 	user: any;
 }
@@ -42,8 +44,27 @@ const HotelController = {
 			const id = req.params.id;
 			const hotel = await HotelSchema.findById(id);
 			const services = await serviceHotelSchema.find({ _id: { $in: hotel!.serviceIds } })
-			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName) };
+			let forms = await FormSchema.find({ hotelId: { $in:hotel!._id } })
+			forms = forms.filter(form => form.comment)
+			const resultForms = await Promise.all(forms.map(async (form) => {
+				const user = await UserSchema.findById(form.userId)
+				const username = user.username
+				console.log("ten",username);
+				
+				return {
+					...form.toJSON(),
+                    username
+				}
+			}))
+			hotel!.ratingAvg = forms.reduce((total, form) => total + form.rating, 0)/forms.length
+			hotel!.cleanlinessAvg = forms.reduce((total, form) => total + form.comment.cleanliness, 0)/forms.length
+			hotel!.serviceAvg = forms.reduce((total, form) => total + form.comment.service, 0)/forms.length
+			hotel!.comfortableAvg = forms.reduce((total, form) => total + form.comment.comfortable, 0)/forms.length
+			hotel!.facilitiesAvg = forms.reduce((total, form) => total + form.comment.facilities, 0)/forms.length
 
+			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName), forms: resultForms };
+
+			
 			return res.status(200).json(hotelService);
 		}
 		catch (error) {

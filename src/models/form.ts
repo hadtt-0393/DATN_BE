@@ -1,5 +1,15 @@
 import mongoose from 'mongoose';
 
+// const Comment = {
+//   service: Number,
+//   cleanliness: Number,
+//   comfortable: Number,
+//   facilities: Number,
+//   content: String,
+//   image: String,
+//   created: Date
+// }
+
 const FormSchema = new mongoose.Schema(
   {
     userId: {
@@ -32,8 +42,7 @@ const FormSchema = new mongoose.Schema(
     startDate: { type: Date },
     endDate: { type: Date },
     comment: {
-      type: String,
-      default: '',
+      type: Object
     },
     adults: {
       type: Number,
@@ -41,7 +50,7 @@ const FormSchema = new mongoose.Schema(
     children: {
       type: Number,
     },
-    note:{
+    note: {
       type: String,
       default: '',
     },
@@ -51,11 +60,7 @@ const FormSchema = new mongoose.Schema(
     rating: {
       type: Number,
       default: 0,
-    },
-    isComment: {
-      type: Boolean,
-      default: false,
-    },
+    }
   },
   { timestamps: true },
 );

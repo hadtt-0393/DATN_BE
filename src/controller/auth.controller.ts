@@ -123,7 +123,7 @@ const AuthController = {
 	async signinAdmin(req: Request, res: Response) {
 		try {
 			const { account, password } = req.body;
-			if (account === "admin" && password === "123456") {
+			if ((account === "admin" && password === "123456") || (account === "admin2" && password === "123456") ) {
 				const accessToken = AuthController.accessTokenAdmin('admin');
 				return res.status(200).json({ message: "Đăng nhập thành công", accessToken: accessToken});
 			}

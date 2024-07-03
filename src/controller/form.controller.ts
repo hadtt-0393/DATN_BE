@@ -15,7 +15,7 @@ const FormControler = {
             const { name, email, phoneNumber, address, note, rooms, startDate, endDate, paymentStatus, cost, adults, children, hotelId } = req.body;
             const formatStartDate = new Date(startDate);
             const formatEndDate = new Date(endDate);
-            let RoomsForm = rooms.map((room: any) => ({roomId: room._id, quantity: room.quantityChoose}));
+            let RoomsForm = rooms.map((room: any) => ({ roomId: room._id, quantity: room.quantityChoose }));
             const form = new FormSchema({
                 userId: id,
                 hotelId: hotelId,
@@ -43,7 +43,7 @@ const FormControler = {
                     }
                 );
             }));
-            
+
 
             return res.status(200).json(form);
         }
@@ -52,8 +52,8 @@ const FormControler = {
         }
     },
 
-    async convertForm (forms: any) {
-        const resultFooms = await Promise.all(forms.map(async (form:any) => {
+    async convertForm(forms: any) {
+        const resultFooms = await Promise.all(forms.map(async (form: any) => {
             let ROOM = [] as any;
             for (let room of form.rooms) {
                 const Room = await RoomSchema.findById(room.roomId);
@@ -69,11 +69,11 @@ const FormControler = {
         return resultFooms;
     },
 
-    async convertIdHotelInForm(forms: any){
-        const resultFooms = await Promise.all(forms.map(async (form:any) => {
+    async convertIdHotelInForm(forms: any) {
+        const resultFooms = await Promise.all(forms.map(async (form: any) => {
             const hotel = await HotelSchema.findById(form.hotelId);
             return {
-               ...form,
+                ...form,
                 hotel: hotel
             };
         }))
@@ -81,7 +81,7 @@ const FormControler = {
     },
 
     async getAllFormByUser(req: RequestWithUser, res: Response) {
-        try {   
+        try {
             const id = req.user.id;
             const forms = await FormSchema.find({ userId: id })
             let results = await FormControler.convertForm(forms);
@@ -105,8 +105,65 @@ const FormControler = {
         catch (error) {
             return res.status(400).json({ error: error });
         }
+    },
+
+    async createComment(req: Request, res: Response) {
+        const id = req.params.id;
+        try {
+            const form = await FormSchema.findById(id);
+            if (!form) {
+                return res.status(404).json({ error: 'Không tìm thấy biểu mẫu.' });
+            }
+
+            const { service, cleanliness, comfortable, facilities, content, image } = req.body;
+            form.rating = (service + cleanliness + facilities + comfortable) / 4
+
+            const newComment = {
+                service,
+                cleanliness,
+                comfortable,
+                facilities,
+                content,
+                image,
+                created: new Date()
+            };
+
+            form.comment = newComment;
+
+            const updatedForm = await form.save();
+            return res.status(200).json(updatedForm);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    },
+
+    async getCommentByUser(req: RequestWithUser, res: Response) {
+        try {
+            const id = req.user.id
+            const formId = req.params.id
+            const form = await FormSchema.findOne({ userId: id, _id: formId })
+            if (!form) {
+                return res.status(404).json({ error: 'Không tìm thấy biểu mẫu.' })
+            }
+            const comment = form.comment
+
+            return res.status(200).json(comment);
+        }
+        catch (error) {
+            return res.status(400).json({ error: error });
+        }
+    },
+
+    async getCommentByHotel( req: Request, res: Response ){
+        try {
+            const id = req.params.id
+            const forms = await FormSchema.find({hotelId: id})
+            const comments = forms.map(form => form.comment)
+            return res.status(200).json(comments);
+        } catch (error) {
+            return res.status(400).json({ error: error})
+        }
     }
+
 }
-
-
 export default FormControler;

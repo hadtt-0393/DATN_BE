@@ -59,15 +59,31 @@ const HotelSchema = new mongoose.Schema(
       type: [String],
       require: true,
     },
-    comments: {
-      type: [],
-      default: [],
-    },
     isActive: {
       type: Boolean,
       required: true,
       default: false
     },
+    serviceAvg: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    cleanlinessAvg: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    comfortableAvg: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    facilitiesAvg: {
+      type: Number,
+      min: 0,
+      max: 5,
+    }
   },
   { timestamps: true },
 );
