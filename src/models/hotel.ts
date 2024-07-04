@@ -17,6 +17,7 @@ const HotelSchema = new mongoose.Schema(
     address: {
       type: String,
       require: true,
+      default: null,
     },
     hotline: {
       type: String,
@@ -39,12 +40,7 @@ const HotelSchema = new mongoose.Schema(
     description: {
       type: String,
       require: true,
-    },
-    ratingAvg: {
-      type: Number,
-      min: 0,
-      max: 5,
-      require: true,
+      default: null,
     },
     discount: {
       type: Number,
@@ -64,26 +60,30 @@ const HotelSchema = new mongoose.Schema(
       required: true,
       default: false
     },
-    serviceAvg: {
-      type: Number,
-      min: 0,
-      max: 5,
-    },
-    cleanlinessAvg: {
-      type: Number,
-      min: 0,
-      max: 5,
-    },
-    comfortableAvg: {
-      type: Number,
-      min: 0,
-      max: 5,
-    },
-    facilitiesAvg: {
-      type: Number,
-      min: 0,
-      max: 5,
-    }
+    // serviceAvg: {
+    //   type: Number,
+    //   min: 0,
+    //   max: 5,
+    //   default: 0,
+    // },
+    // cleanlinessAvg: {
+    //   type: Number,
+    //   min: 0,
+    //   max: 5,
+    //   default: 0,
+    // },
+    // comfortableAvg: {
+    //   type: Number,
+    //   min: 0,
+    //   max: 5,
+    //   default: 0,
+    // },
+    // facilitiesAvg: {
+    //   type: Number,
+    //   min: 0,
+    //   max: 5,
+    //   default: 0,
+    // }
   },
   { timestamps: true },
 );

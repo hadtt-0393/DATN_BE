@@ -39,6 +39,9 @@ const RoomController = {
 					return RoomSchema.findById(roomId);
 				}),
 			);
+			if (roomList.length === 0) {
+				return res.status(200).json([]);
+			}
 			roomList = roomList.map((room: any) => ({ ...room.toJSON(), quantityAvailable: getQuantityRoomsIsActive(room!, start, end) }));
 			res.status(200).json(roomList);
 		}

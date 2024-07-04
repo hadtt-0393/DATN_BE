@@ -7,7 +7,7 @@ import RoomSchema from "../models/room";
 import CitySchema from "../models/city";
 import serviceRoomSchema from "../models/serviceRoom";
 import serviceHotelSchema from "../models/serviceHotel";
-import { getHotelsByService, getHotelsByServiceVer2 } from "../utils/hotel";
+import { getHotelsByService, getHotelsByServiceVer2, getHotelsByRating, getHotelsByRatingVer2 } from "../utils/hotel";
 import { getQuantityRoomsIsActive } from "../utils/room";
 import FormSchema from "../models/form";
 import UserSchema from "../models/user";
@@ -30,10 +30,10 @@ const HotelController = {
 			const { city } = req.params
 			const hotels = await HotelSchema.find({ isActive: true, city });
 			console.log(city);
-			
+
 			console.log("tim kiem h city", hotels.length);
 			return res.status(200).json(hotels);
-			
+
 		} catch (error) {
 			return res.status(400).json({ error: error });
 		}
@@ -42,29 +42,20 @@ const HotelController = {
 	async getDetailHotel(req: Request, res: Response) {
 		try {
 			const id = req.params.id;
-			const hotel = await HotelSchema.findById(id);
+			let hotel = await HotelSchema.findById(id) as any;
 			const services = await serviceHotelSchema.find({ _id: { $in: hotel!.serviceIds } })
-			let forms = await FormSchema.find({ hotelId: { $in:hotel!._id } })
-			forms = forms.filter(form => form.comment)
-			const resultForms = await Promise.all(forms.map(async (form) => {
+			const hotelRating = await getHotelsByRating(hotel)
+			const formFilter = await FormSchema.find({ hotelId: id, comment: { $exists: true } })
+
+			const resultForms = await Promise.all(formFilter.map(async (form) => {
 				const user = await UserSchema.findById(form.userId)
 				const username = user.username
-				console.log("ten",username);
-				
 				return {
 					...form.toJSON(),
-                    username
+					username
 				}
 			}))
-			hotel!.ratingAvg = forms.reduce((total, form) => total + form.rating, 0)/forms.length
-			hotel!.cleanlinessAvg = forms.reduce((total, form) => total + form.comment.cleanliness, 0)/forms.length
-			hotel!.serviceAvg = forms.reduce((total, form) => total + form.comment.service, 0)/forms.length
-			hotel!.comfortableAvg = forms.reduce((total, form) => total + form.comment.comfortable, 0)/forms.length
-			hotel!.facilitiesAvg = forms.reduce((total, form) => total + form.comment.facilities, 0)/forms.length
-
-			const hotelService = { ...hotel?.toObject(), services: services.map(service => service.serviceName), forms: resultForms };
-
-			
+			const hotelService = { ...hotelRating, services: services.map(service => service.serviceName), forms: resultForms };
 			return res.status(200).json(hotelService);
 		}
 		catch (error) {
@@ -92,7 +83,7 @@ const HotelController = {
 				hotelName: hotelName,
 				address: address,
 				distance: distance,
-				description: description,	
+				description: description,
 				discount: discount,
 				serviceIds,
 				images,
@@ -112,17 +103,17 @@ const HotelController = {
 	async getAllHotel(req: Request, res: Response) {
 		try {
 			let hotels = await HotelSchema.find({ isActive: true })
-			hotels = await Promise.all(hotels.map(async(hotel: any) => {
+			hotels = await Promise.all(hotels.map(async (hotel: any) => {
 				let listRoomId = hotel.roomIds;
 				const listServiceHotel = hotel.serviceIds;
-				const serviceHotel = await serviceHotelSchema.find({_id: {$in: listServiceHotel}})
-				let rooms = await RoomSchema.find({_id: listRoomId});
-				rooms = await Promise.all(rooms.map(async(room: any) => {
+				const serviceHotel = await serviceHotelSchema.find({ _id: { $in: listServiceHotel } })
+				let rooms = await RoomSchema.find({ _id: listRoomId });
+				rooms = await Promise.all(rooms.map(async (room: any) => {
 					const listServiceRoom = room.serviceIds;
 					const services = await serviceRoomSchema.find({ _id: { $in: listServiceRoom } })
-					return {...room.toJSON(), services: services.map(item => item.serviceName) };
+					return { ...room.toJSON(), services: services.map(item => item.serviceName) };
 				}))
-				return {...hotel.toJSON(), rooms, services: serviceHotel.map(item => item.serviceName)};
+				return { ...hotel.toJSON(), rooms, services: serviceHotel.map(item => item.serviceName) };
 			}))
 			return res.status(200).json(hotels);
 		} catch (error) {
@@ -132,10 +123,13 @@ const HotelController = {
 
 	async getTopTenRating(req: Request, res: Response) {
 		try {
-			const top10Rating = await HotelSchema.find({ isActive: true })
-				.sort({ ratingAvg: -1 })
-				.limit(10);
-			const result = await getHotelsByService(top10Rating);
+			const hotels = await HotelSchema.find({ isActive: true }) as any
+			const hotelsByComments = await Promise.all(hotels.map(async (hotel: any) => await getHotelsByRating(hotel))) as any
+			const top10Hotels = hotelsByComments
+				.filter((hotel: any) => hotel.ratingAvg !== undefined)
+				.sort((a: any, b: any) => b.ratingAvg - a.ratingAvg)
+				.slice(0, 10);
+			const result = await getHotelsByServiceVer2(top10Hotels);
 			return res.status(200).json(result);
 		} catch (err) {
 			return res.status(400).json({ error: err });
@@ -144,10 +138,13 @@ const HotelController = {
 
 	async getTopTenNewest(req: Request, res: Response) {
 		try {
-			const top10Newest = await HotelSchema.find({ isActive: true })
-				.sort({ createdAt: -1 })
-				.limit(10);
-			const result = await getHotelsByService(top10Newest);
+			const hotels = await HotelSchema.find({ isActive: true }) as any
+			const hotelsByComments = await Promise.all(hotels.map(async (hotel: any) => await getHotelsByRating(hotel))) as any;
+			const top10Newest = hotelsByComments
+				.filter((hotel: any) => hotel.ratingAvg !== undefined)
+				.sort((a: any, b: any) => a.createdAt - b.createdAt)
+				.slice(0, 10);
+			const result = await getHotelsByServiceVer2(top10Newest);
 			return res.status(200).json(result);
 		} catch (err) {
 			return res.status(400).json({ error: err });
@@ -179,7 +176,9 @@ const HotelController = {
 			//Filter hotel by [index] hotelsMapBoolean 
 			const filterHotel = listHotelByCity.filter((hotel, index) => hotelsMapBoolean[index]);
 			const resultHotel = await getHotelsByService(filterHotel);
-			return res.status(200).json(resultHotel);
+			console.log("resultHotel", resultHotel);
+			const ResultHotel = await Promise.all(resultHotel.map(async(hotel: any) => await getHotelsByRatingVer2(hotel)))
+			return res.status(200).json(ResultHotel);
 		}
 		catch (error) {
 			return res.status(400).json({ error: error });
