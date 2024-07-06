@@ -37,6 +37,10 @@ const RoomSchema = new mongoose.Schema(
         beds: {
             type: Array,
             default: [],
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
         }
     },
     { timestamps: true },

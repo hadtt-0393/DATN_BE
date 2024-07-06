@@ -43,7 +43,6 @@ const UserController = {
             res.status(200).json(info);
         }
         catch (err) {
-            console.log(err);
             return res.status(400).json({ error: err });
         }
     }

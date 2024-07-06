@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Document } from "mongoose";
 import RoomSchema from "../models/room";
 import HotelSchema from "../models/hotel";
 import FormSchema from "../models/form";
@@ -43,8 +42,6 @@ const FormControler = {
                     }
                 );
             }));
-
-
             return res.status(200).json(form);
         }
         catch (error) {

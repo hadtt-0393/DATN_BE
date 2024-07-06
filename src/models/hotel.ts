@@ -60,6 +60,11 @@ const HotelSchema = new mongoose.Schema(
       required: true,
       default: false
     },
+    cheapestPrice: {
+      type: Number,
+      require: true,
+      default: 250000,
+    },
     // serviceAvg: {
     //   type: Number,
     //   min: 0,
