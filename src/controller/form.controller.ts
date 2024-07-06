@@ -133,34 +133,5 @@ const FormControler = {
             return res.status(400).json({ error: error.message });
         }
     },
-
-    async getCommentByUser(req: RequestWithUser, res: Response) {
-        try {
-            const id = req.user.id
-            const formId = req.params.id
-            const form = await FormSchema.findOne({ userId: id, _id: formId })
-            if (!form) {
-                return res.status(404).json({ error: 'Không tìm thấy biểu mẫu.' })
-            }
-            const comment = form.comment
-
-            return res.status(200).json(comment);
-        }
-        catch (error) {
-            return res.status(400).json({ error: error });
-        }
-    },
-
-    async getCommentByHotel( req: Request, res: Response ){
-        try {
-            const id = req.params.id
-            const forms = await FormSchema.find({hotelId: id})
-            const comments = forms.map(form => form.comment)
-            return res.status(200).json(comments);
-        } catch (error) {
-            return res.status(400).json({ error: error})
-        }
-    }
-
 }
 export default FormControler;

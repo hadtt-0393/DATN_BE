@@ -10,14 +10,10 @@ const CitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    slogan: {
-      type: String,
-      required: true,
-    },
     hotelIds: {
       type: [String],
       required: true,
-    }
+    } 
   },
 );
 

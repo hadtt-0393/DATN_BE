@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import UserSchema from "../models/user";
 import FormSchema from "../models/form";
 import HotelSchema from "../models/hotel";
+import RoomSchema from "../models/room";
 
 interface RequestWithUser extends Request {
     user: any;
@@ -19,10 +20,19 @@ const UserController = {
                 let forms = await FormSchema.find({ userId: userId });
                 forms = await Promise.all(forms.map(async(form: any) => {
                     const hotelId = form.hotelId;
+
+                    const rooms = form.rooms;
+                    let Rooms = await Promise.all(rooms.map(async (room: any) => {
+                        const Room = await RoomSchema.findById(room.roomId);
+                        return {roomType: Room?.roomType, quantity: room.quantity}
+                    }))
+
+
                     const hotel = await HotelSchema.findById(hotelId);
                     return {
                        ...form.toJSON(),
-                        hotel: hotel
+                        hotel: hotel,
+                        Rooms
                     }
                 }))
                 return {...user.toJSON(), forms}

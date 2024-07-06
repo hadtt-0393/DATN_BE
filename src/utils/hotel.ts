@@ -40,7 +40,6 @@ async function getHotelsByRating(hotel: any) {
 	let facilitiesAvg;
 	let countComments;
 	let countForms = forms.length;
-    console.log(countForms)
 	if (formFilter.length === 0) {
 		return { ...hotel, countForms };
 	}

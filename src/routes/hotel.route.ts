@@ -10,6 +10,7 @@ route.get("/getHotelBySearch", HotelController.getHotelBySearch); //lay ra hotel
 route.get("/getHotelByFilter", HotelController.getHotelByFilter); //lay ra hotel by filter")
 route.get("/get-detail", middlewareToken.verifyToken as any, middlewareToken.verifyStaff as any, HotelController.getDetailhotelByStaff as any);  //lay ra detail hotel voi quyen cua staff
 route.put('/update-detail-hotel', middlewareToken.verifyToken as any, middlewareToken.verifyStaff as any, HotelController.updateHotel as any); //
+route.put('/update-status-hotel', middlewareToken.verifyToken as any, middlewareToken.verifyAdmin as any, HotelController.updateStatusHotel as any); //update status hotel
 route.get("/:id", HotelController.getDetailHotel)               // lay ra detail cua hotel
 
 export default route;
