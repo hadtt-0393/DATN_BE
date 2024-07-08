@@ -19,7 +19,10 @@ const FormSchema = new mongoose.Schema(
       type: String,
     },
     rooms: {
-      type: [Object],
+      type: [{
+        roomId: String,
+        quantity: Number,
+      }],
     },
     name: {
       type: String,

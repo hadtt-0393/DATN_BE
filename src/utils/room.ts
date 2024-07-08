@@ -7,7 +7,7 @@ interface Room {
 	toObject: () => any;
 }
 
-function getQuantityRoomsIsActive(room: any, start: any, end: any) {
+function getQuantityRoomsIsAvailable(room: any, start: any, end: any) {
 	const startTime = new Date(start);
 	const endTime = new Date(end);
 	if (room.bookings.length === 0) {
@@ -51,4 +51,4 @@ async function getListRoomActive(roomIds: String[]) {
 	return roomList;
 }
 
-export { getQuantityRoomsIsActive, getRoomsByService, getListRoomActive };
+export { getQuantityRoomsIsAvailable, getRoomsByService, getListRoomActive };

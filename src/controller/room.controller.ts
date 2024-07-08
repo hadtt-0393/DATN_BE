@@ -6,7 +6,7 @@ import RoomSchema from "../models/room";
 import { getRoomsByBed } from "../utils/bed";
 import {
 	getListRoomActive,
-	getQuantityRoomsIsActive,
+	getQuantityRoomsIsAvailable,
 	getRoomsByService,
 } from "../utils/room";
 import { generateCombinationDFS } from "../utils/search";
@@ -41,7 +41,7 @@ const RoomController = {
 			}
 			roomList = roomList.map((room: any) => ({
 				...room.toJSON(),
-				quantityAvailable: getQuantityRoomsIsActive(room!, start, end),
+				quantityAvailable: getQuantityRoomsIsAvailable(room!, start, end),
 			}));
 			res.status(200).json(roomList);
 		} catch (error) {
@@ -160,8 +160,8 @@ const RoomController = {
 			let roomList = await getListRoomActive(hotel!.roomIds);
 			roomList = roomList.map((room) => ({
 				...room!.toJSON(),
-				quantity: getQuantityRoomsIsActive(room!, startDate, endDate),
-				quantityAvailable: getQuantityRoomsIsActive(
+				quantity: getQuantityRoomsIsAvailable(room!, startDate, endDate),
+				quantityAvailable: getQuantityRoomsIsAvailable(
 					room!,
 					startDate,
 					endDate
@@ -188,7 +188,7 @@ const RoomController = {
 			const listRoomActive = await getListRoomActive(hotel!.roomIds);
 			
 			const roomFilter = listRoomActive.filter((room) => {
-				const activeRooms = getQuantityRoomsIsActive(
+				const activeRooms = getQuantityRoomsIsAvailable(
 					room,
 					startDate,
 					endDate
@@ -199,7 +199,7 @@ const RoomController = {
 			const resultRoomByService = await getRoomsByService(roomFilter);
 			const resultRoomByBed = await getRoomsByBed(resultRoomByService);
 			const resultRoomAvailable = resultRoomByBed.map((room) => {
-				const quantityAvailable = getQuantityRoomsIsActive(
+				const quantityAvailable = getQuantityRoomsIsAvailable(
 					room,
 					startDate,
 					endDate

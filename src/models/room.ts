@@ -31,7 +31,10 @@ const RoomSchema = new mongoose.Schema(
             required: true,
         },
         bookings: {
-            type: Array,
+            type: [{
+                start: String,
+                end: String,
+            }],
             default: [],
         },
         beds: {

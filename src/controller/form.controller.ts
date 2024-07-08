@@ -137,20 +137,38 @@ const FormControler = {
     async cancleForm(req: Request, res: Response) {
         const id = req.body.id;
         try {
-            const form = await FormSchema.findById(id) as any;
+            const form = await FormSchema.findById(id);
             if (!form) {
                 return res.status(404).json({ error: 'Không tìm thấy biểu mẫu.' });
             }
-            // form.paymentStatus = 'Canceled';
-            // const updatedForm = await form.save();
             const startDate = form.startDate;
             const endDate = form.endDate;
-
-            
-
-            console.log(startDate, endDate);
-            return res.status(200).json({message: 'Success'})
-                
+            const formRooms = form.rooms;
+            const getQuantity = (id: string) => formRooms.find(r => r.roomId == id
+            )?.quantity || 0;
+            const isDateEq = (v1: Date | string | undefined | null, v2: Date | string | undefined | null) => {
+                if (!v1 || !v2) return false;
+                v1 = new Date(v1);
+                v2 = new Date(v2);
+                return v1.getFullYear() === v2.getFullYear() && v1.getMonth() === v2.getMonth() && v1.getDate() === v2.getDate();
+            }
+            const rooms = await RoomSchema.find({ _id: formRooms.map(r => r.roomId) });
+            for (const room of rooms) {
+                let quantity = getQuantity(room.id);
+                for (const booking of room.bookings) {
+                    if (quantity < 0) break;
+                    const isMatch = isDateEq(booking.start, startDate) && isDateEq(booking.end, endDate);
+                    if (isMatch) {
+                        --quantity;
+                        room.bookings.remove(booking);
+                    }
+                }
+                room.bookings = Object.assign(room.bookings);
+                await room.save();
+            }
+            form.paymentStatus = "cancel";
+            await form.save();
+            return res.status(200).json({ message: 'Success' })
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }
