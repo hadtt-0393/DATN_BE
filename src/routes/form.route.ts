@@ -7,4 +7,5 @@ route.post("/createForm", middlewareToken.verifyToken as any, middlewareToken.ve
 route.get("/getAllFormByUser", middlewareToken.verifyToken as any, middlewareToken.verifyUser as any, FormController.getAllFormByUser as any)
 route.get("/getAllFormByStaff", middlewareToken.verifyToken as any, middlewareToken.verifyStaff as any, FormController.getAllFormByStaff as any)
 route.post("/createComment/:id", middlewareToken.verifyToken as any, middlewareToken.verifyUser as any, FormController.createComment as any)
+route.post("/cancleForm", middlewareToken.verifyToken as any, middlewareToken.verifyUser as any, FormController.cancleForm as any)
 export default route;

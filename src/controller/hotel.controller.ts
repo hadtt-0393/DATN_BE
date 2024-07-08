@@ -152,13 +152,13 @@ const HotelController = {
 					return { ...hotel, status: "Không duyệt" };
 				}
 			});
-			hotels = await Promise.all (hotels.map(async(hotel: any) => {
-				const listForm = await FormSchema.find({hotelId: hotel._id, comment: {$exists: true}})
+			hotels = await Promise.all(hotels.map(async (hotel: any) => {
+				const listForm = await FormSchema.find({ hotelId: hotel._id, comment: { $exists: true } })
 				if (listForm.length === 0) {
-					return {...hotel}
+					return { ...hotel }
 				}
 				const ratingAvg = listForm.reduce((acc: any, form: any) => acc + form.rating, 0) / listForm.length;
-				return {...hotel, ratingAvg}
+				return { ...hotel, ratingAvg }
 			}))
 			return res.status(200).json(hotels);
 		} catch (error) {
@@ -168,14 +168,17 @@ const HotelController = {
 
 	async getTopTenRating(req: Request, res: Response) {
 		try {
-			const hotels = (await HotelSchema.find({ isActive: true })) as any;
+			let hotels = (await HotelSchema.find({ isActive: true })) as any;
+			hotels = hotels.map((hotel: any) => hotel.toJSON());
 			const hotelsByComments = (await Promise.all(
 				hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
 			)) as any;
-			const top10Hotels = hotelsByComments
+			let top10Hotels = hotelsByComments
 				.filter((hotel: any) => hotel.ratingAvg !== undefined)
 				.sort((a: any, b: any) => b.ratingAvg - a.ratingAvg)
 				.slice(0, 10);
+
+			top10Hotels = await getHotelsByService(top10Hotels);
 			return res.status(200).json(top10Hotels);
 		} catch (err) {
 			return res.status(400).json({ error: err });
@@ -184,8 +187,9 @@ const HotelController = {
 
 	async getTopTenNewest(req: Request, res: Response) {
 		try {
-			const hotels = (await HotelSchema.find({ isActive: true })) as any;
-			const hotelsByComments = (await Promise.all(
+			let hotels = (await HotelSchema.find({ isActive: true })) as any;
+			hotels = hotels.map((hotel: any) => hotel.toJSON());
+			const hotelsByComments = (await Promise.all(	
 				hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
 			)) as any;
 			const top10Newest = hotelsByComments
@@ -209,6 +213,13 @@ const HotelController = {
 				children,
 				roomNumber,
 			}: any = req.query;
+			console.log(city,
+				startDate,
+				endDate,
+				adult,
+				children,
+				roomNumber);
+
 			const totalPeopleNum = parseInt(adult) + parseInt(children);
 			const roomNum = parseInt(roomNumber);
 			const City = await CitySchema.findOne({ cityName: city });
@@ -241,6 +252,9 @@ const HotelController = {
 					);
 				})
 			);
+
+			console.log("DDayyy: ", hotelsMapBoolean);
+
 			//Filter hotel by [index] hotelsMapBoolean
 			const resultSearchHotel = listHotelByCity
 				.filter((hotel, index) => hotelsMapBoolean[index])
@@ -274,6 +288,17 @@ const HotelController = {
 				serviceRoom,
 				priceRange,
 			}: any = req.query;
+			console.log(
+				city,
+				startDate,
+				endDate,
+				adult,
+				children,
+				roomNumber,
+				distance,
+				priceRange,
+			);
+
 			const totalPeopleNum = parseInt(adult) + parseInt(children);
 			const roomNum = parseInt(roomNumber);
 			const serviceRoomArray = serviceRoom
@@ -281,16 +306,16 @@ const HotelController = {
 				: [];
 			const distanceArray = distance
 				? distance
-						.split(",")
-						.map((dist: string) => parseFloat(dist.trim()))
+					.split(",")
+					.map((dist: string) => parseFloat(dist.trim()))
 				: [];
 			const serviceHotelArray = serviceHotel
 				? serviceHotel.split(",").map((service: any) => service.trim())
 				: [];
 			const priceRangeArray = priceRange
 				? priceRange
-						.split(",")
-						.map((price: string) => parseFloat(price.trim()))
+					.split(",")
+					.map((price: string) => parseFloat(price.trim()))
 				: [];
 			const City = await CitySchema.findOne({ cityName: city });
 			const listHotelByCity = await HotelSchema.find({
@@ -367,7 +392,7 @@ const HotelController = {
 							const isRoomComforPrice =
 								priceRangeArray.length > 0
 									? room.price >= minPrice &&
-									  room.price <= maxPrice
+									room.price <= maxPrice
 									: true;
 							return roomHasAllService && isRoomComforPrice;
 						});

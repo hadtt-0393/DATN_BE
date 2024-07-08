@@ -133,5 +133,27 @@ const FormControler = {
             return res.status(400).json({ error: error.message });
         }
     },
+
+    async cancleForm(req: Request, res: Response) {
+        const id = req.body.id;
+        try {
+            const form = await FormSchema.findById(id) as any;
+            if (!form) {
+                return res.status(404).json({ error: 'Không tìm thấy biểu mẫu.' });
+            }
+            // form.paymentStatus = 'Canceled';
+            // const updatedForm = await form.save();
+            const startDate = form.startDate;
+            const endDate = form.endDate;
+
+            
+
+            console.log(startDate, endDate);
+            return res.status(200).json({message: 'Success'})
+                
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
 }
 export default FormControler;
