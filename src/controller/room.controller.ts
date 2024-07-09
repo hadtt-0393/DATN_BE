@@ -3,7 +3,7 @@
 import { Request, Response } from "express";
 import HotelSchema from "../models/hotel";
 import RoomSchema from "../models/room";
-import { getRoomsByBed } from "../utils/bed";
+import { createBed, getRoomsByBed } from "../utils/bed";
 import {
 	getListRoomActive,
 	getQuantityRoomsIsAvailable,
@@ -138,6 +138,7 @@ const RoomController = {
 				image: image,
 				maxPeople,
 				serviceIds: services,
+				beds: createBed(maxPeople),
 			});
 			await room.save();
 			hotel!.roomIds.push(room.id);
@@ -158,6 +159,7 @@ const RoomController = {
 			const roomNum = parseInt(roomNumber);
 			const hotel = await HotelSchema.findById(id);
 			let roomList = await getListRoomActive(hotel!.roomIds);
+
 			roomList = roomList.map((room) => ({
 				...room!.toJSON(),
 				quantity: getQuantityRoomsIsAvailable(room!, startDate, endDate),
@@ -186,14 +188,14 @@ const RoomController = {
 			const { startDate, endDate }: any = req.query;
 			const hotel = await HotelSchema.findById(id);
 			const listRoomActive = await getListRoomActive(hotel!.roomIds);
-			
+
 			const roomFilter = listRoomActive.filter((room) => {
-				const activeRooms = getQuantityRoomsIsAvailable(
+				const availableRooms = getQuantityRoomsIsAvailable(
 					room,
 					startDate,
 					endDate
 				);
-				return activeRooms > 0;
+				return availableRooms > 0;
 			}).map((room: any) => room.toObject());
 
 			const resultRoomByService = await getRoomsByService(roomFilter);

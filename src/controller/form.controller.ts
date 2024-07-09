@@ -166,7 +166,7 @@ const FormControler = {
                 room.bookings = Object.assign(room.bookings);
                 await room.save();
             }
-            form.paymentStatus = "cancel";
+            form.paymentStatus = "Đã hủy đặt phòng";
             await form.save();
             return res.status(200).json({ message: 'Success' })
         } catch (error: any) {

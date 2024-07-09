@@ -13,7 +13,7 @@ const AuthController = {
 			const { email, password } = req.body;
 			const user = await UserSchema.findByEmail(email);
 			if (!user) {
-				return res.status(400).json({ message: "Không tìm thấy email!" });
+				return res.status(400).json( 	);
 			}
 			const validPassword = await bcrypt.compare(password, user.password);
 			if (!validPassword) {

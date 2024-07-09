@@ -28,8 +28,19 @@ const HotelController = {
 			const services = await serviceHotelSchema.find({
 				_id: { $in: hotel!.serviceIds },
 			});
+
+			const roomsType = await RoomSchema.find(
+				{
+					_id: { $in: hotel!.roomIds },
+					isActive: true,
+				}
+			)
+
+			const totalRooms = roomsType.reduce((totalRoom, roomType) => totalRoom + roomType.quantity, 0)
 			const hotelRating = await getHotelsByRating(hotel.toJSON());
-			
+			const forms = await FormSchema.find({hotelId: id})
+			const countForms = forms.length
+
 			const formFilter = await FormSchema.find({
 				hotelId: id,
 				comment: { $exists: true },
@@ -48,6 +59,8 @@ const HotelController = {
 				...hotelRating,
 				services: services.map((service) => service.serviceName),
 				formsFeedback: resultForms,
+				totalRooms: totalRooms,
+				countForms
 			};
 			return res.status(200).json(hotelService);
 		} catch (error) {
@@ -190,11 +203,11 @@ const HotelController = {
 		try {
 			let hotels = (await HotelSchema.find({ isActive: true })) as any;
 			hotels = hotels.map((hotel: any) => hotel.toJSON());
-			const hotelsByComments = (await Promise.all(	
-				hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
-			)) as any;
-			const top10Newest = hotelsByComments
-				.filter((hotel: any) => hotel.ratingAvg !== undefined)
+			// const hotelsByComments = (await Promise.all(
+			// 	hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
+			// )) as any;
+			const top10Newest = hotels
+				// .filter((hotel: any) => hotel.ratingAvg !== undefined)
 				.sort((a: any, b: any) => a.createdAt - b.createdAt)
 				.slice(0, 10);
 			const result = await getHotelsByService(top10Newest);
@@ -238,7 +251,7 @@ const HotelController = {
 						);
 						totalRoomAvailable += quantityRoomAvailable;
 						totalPositionAvailable +=
-						quantityRoomAvailable * room!.maxPeople;
+							quantityRoomAvailable * room!.maxPeople;
 					}
 					return (
 						totalRoomAvailable >= roomNum &&
@@ -337,7 +350,7 @@ const HotelController = {
 						}
 						totalRoomAvailable += quantityRoomAvailable;
 						totalPositionAvailable +=
-						quantityRoomAvailable * room!.maxPeople;
+							quantityRoomAvailable * room!.maxPeople;
 					}
 					return {
 						...hotel.toObject(),
@@ -353,7 +366,7 @@ const HotelController = {
 				(hotel: any, index) => hotel.isAvailable
 			) as any;
 
-			
+
 			if (filterHotel.length === 0) {
 				return res.status(200).json([]);
 			} else {
@@ -371,8 +384,8 @@ const HotelController = {
 					if (!hotelHasAllService) {
 						continue;
 					}
-					
-					
+
+
 					else {
 						let minPrice = 0;
 						let maxPrice = 0;
