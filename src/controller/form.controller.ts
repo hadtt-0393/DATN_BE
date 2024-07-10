@@ -29,7 +29,7 @@ const FormControler = {
                 rooms: RoomsForm,
                 paymentStatus,
                 startDate: formatStartDate,
-                endDate: formatEndDate
+                endDate: formatEndDate,
             });
             await form.save();
             const booking = { start: formatStartDate, end: formatEndDate };
@@ -104,6 +104,59 @@ const FormControler = {
         }
     },
 
+    async getAllFormByAdmin(req: RequestWithUser, res: Response) {
+        try {
+            const id = req.user.id;
+            const forms = await FormSchema.find()
+            return res.status(200).json(forms);
+        }
+        catch (error) {
+            return res.status(400).json({ error: error });
+        }
+    },
+
+    async getTopTenHotelsByForms(req: Request, res: Response) {
+        try {
+            // Lấy tất cả các forms và thực hiện aggregation
+            const forms = await FormSchema.aggregate([
+                {
+                    $group: {
+                        _id: '$hotelId',
+                        bookingCount: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort: { bookingCount: -1 },
+                },
+                {
+                    $limit: 10,
+                },
+            ]);
+
+            // Lấy danh sách các hotelId từ kết quả của forms
+            const hotelIds = forms.map(form => form._id);
+
+            // Tìm thông tin các khách sạn dựa trên danh sách hotelIds
+            const hotels = await HotelSchema.find({ _id: { $in: hotelIds } });
+
+            // Kết hợp thông tin forms với thông tin khách sạn
+            const result = forms.map(form => {
+                const hotel = hotels.find(h => h._id.toString() === form._id.toString());
+                return {
+                    hotelId: form._id,
+                    bookingCount: form.bookingCount,
+                    hotelInfo: hotel,
+                };
+            });
+
+            // Trả về danh sách top 10 khách sạn cùng thông tin và số lượt đặt phòng
+            return res.status(200).json(result);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+
+    },
+
     async createComment(req: Request, res: Response) {
         const id = req.params.id;
         try {
@@ -166,7 +219,7 @@ const FormControler = {
                 room.bookings = Object.assign(room.bookings);
                 await room.save();
             }
-            form.paymentStatus = "Đã hủy đặt phòng";
+            form.status = false;
             await form.save();
             return res.status(200).json({ message: 'Success' })
         } catch (error: any) {

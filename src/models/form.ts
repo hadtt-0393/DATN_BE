@@ -63,6 +63,10 @@ const FormSchema = new mongoose.Schema(
     rating: {
       type: Number,
       default: 0,
+    },
+    status: {
+      type: Boolean,
+      default: true,
     }
   },
   { timestamps: true },

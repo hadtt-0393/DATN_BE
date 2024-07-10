@@ -203,11 +203,10 @@ const HotelController = {
 		try {
 			let hotels = (await HotelSchema.find({ isActive: true })) as any;
 			hotels = hotels.map((hotel: any) => hotel.toJSON());
-			// const hotelsByComments = (await Promise.all(
-			// 	hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
-			// )) as any;
-			const top10Newest = hotels
-				// .filter((hotel: any) => hotel.ratingAvg !== undefined)
+			const hotelsByComments = (await Promise.all(
+				hotels.map(async (hotel: any) => await getHotelsByRating(hotel))
+			)) as any;
+			const top10Newest = hotelsByComments
 				.sort((a: any, b: any) => a.createdAt - b.createdAt)
 				.slice(0, 10);
 			const result = await getHotelsByService(top10Newest);
@@ -216,6 +215,8 @@ const HotelController = {
 			return res.status(400).json({ error: err });
 		}
 	},
+
+	
 
 	async getHotelBySearch(req: Request, res: Response): Promise<any> {
 		try {
