@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import UserSchema from "../models/user"
 import StaffSchema from "../models/staff"
 import HotelSchema from "../models/hotel"
+import CitySchema from "../models/city"
+import { createRandomCheapestPrice } from "../utils/hotel";
 
 const AuthController = {
 	async signinUser(req: Request, res: Response) {
@@ -13,7 +15,7 @@ const AuthController = {
 			const { email, password } = req.body;
 			const user = await UserSchema.findByEmail(email);
 			if (!user) {
-				return res.status(400).json( 	);
+				return res.status(400).json();
 			}
 			const validPassword = await bcrypt.compare(password, user.password);
 			if (!validPassword) {
@@ -25,7 +27,7 @@ const AuthController = {
 				const accessToken = AuthController.accessToken(user, 'user');
 				const { password, ...info } = user.toObject();
 				const message = "Đăng nhập thành công!";
-				return res.status(200).json({...info, accessToken, message});
+				return res.status(200).json({ ...info, accessToken, message });
 			}
 		} catch (err) {
 			return res.status(500).json({ message: err });
@@ -63,7 +65,7 @@ const AuthController = {
 	async signinStaff(req: Request, res: Response) {
 		try {
 			const { email, password } = req.body;
-			const staff = await StaffSchema.findByEmail(email);
+			let staff = await StaffSchema.findByEmail(email);
 			if (!staff) {
 				return res.status(400).json({ message: "Không tìm thấy email!" });
 			}
@@ -75,9 +77,29 @@ const AuthController = {
 			}
 			if (staff && validPassword) {
 				const accessToken = AuthController.accessToken(staff, 'staff');
-				const { password, ...info } = staff.toObject();
+				const hotel = await HotelSchema.findOne({ owner: staff._id })
+				const hotelStatus = hotel?.isActive
 				const message = "Đăng nhập thành công!";
-				return res.status(200).json({ info, accessToken, message });
+				if (hotelStatus === false) {
+					staff = { ...staff.toObject(), status: "Bị từ chối" }
+					const { password, ...info } = staff;
+					return res.status(200).json({ info, accessToken, message });
+				}
+				else {
+					const cityName = staff.city
+					const city = await CitySchema.findOne({ cityName })
+					const hotelIds = city!.hotelIds
+					if (hotelIds.includes(hotel.id)) {
+						staff = { ...staff.toObject(), status: "Đã xác thực" }
+						const { password, ...info } = staff;
+						return res.status(200).json({ info, accessToken, message });
+					}
+					else{
+						staff = { ...staff.toObject(), status: "Đang xác thực" }
+                        const { password, ...info } = staff;
+                        return res.status(200).json({ info, accessToken, message });
+					}
+				}
 			}
 		} catch (err) {
 			return res.status(500).json({ message: err });
@@ -109,6 +131,7 @@ const AuthController = {
 				owner: newStaff.id,
 				email: email,
 				hotline: phoneNumber,
+				cheapestPrice: createRandomCheapestPrice(),
 			})
 
 			const { password: string, ...rest } = newStaff.toObject();
@@ -123,9 +146,9 @@ const AuthController = {
 	async signinAdmin(req: Request, res: Response) {
 		try {
 			const { account, password } = req.body;
-			if ((account === "admin" && password === "123456") || (account === "admin2" && password === "123456") ) {
+			if ((account === "admin" && password === "123456") || (account === "admin2" && password === "123456")) {
 				const accessToken = AuthController.accessTokenAdmin('admin');
-				return res.status(200).json({ message: "Đăng nhập thành công!", accessToken: accessToken});
+				return res.status(200).json({ message: "Đăng nhập thành công!", accessToken: accessToken });
 			}
 			else {
 				return res
@@ -138,9 +161,9 @@ const AuthController = {
 	},
 
 	async isLogin(req: Request, res: Response) {
-        return res.status(200).json
-            ({ isLogin: true });
-    },
+		return res.status(200).json
+			({ isLogin: true });
+	},
 
 
 	accessToken(user: any, role: string) {
@@ -149,11 +172,12 @@ const AuthController = {
 		});
 	},
 
-	accessTokenAdmin(role: string){
-		return jwt.sign({role: role}, process.env.ACCESS_TOKEN_SECRET!, {
-            expiresIn: "1d",
-        });
+	accessTokenAdmin(role: string) {
+		return jwt.sign({ role: role }, process.env.ACCESS_TOKEN_SECRET!, {
+			expiresIn: "1d",
+		});
 	}
 };
 
 export default AuthController;
+

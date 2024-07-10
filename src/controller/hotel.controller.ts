@@ -39,7 +39,6 @@ const HotelController = {
 			const totalRooms = roomsType.reduce((totalRoom, roomType) => totalRoom + roomType.quantity, 0)
 			const hotelRating = await getHotelsByRating(hotel.toJSON());
 			const forms = await FormSchema.find({hotelId: id})
-			const countForms = forms.length
 
 			const formFilter = await FormSchema.find({
 				hotelId: id,
@@ -60,7 +59,6 @@ const HotelController = {
 				services: services.map((service) => service.serviceName),
 				formsFeedback: resultForms,
 				totalRooms: totalRooms,
-				countForms
 			};
 			return res.status(200).json(hotelService);
 		} catch (error) {

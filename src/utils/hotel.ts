@@ -25,12 +25,13 @@ async function getHotelsByService(hotels: any[]) {
 
 async function getHotelsByRating(hotel: any) {
 	const forms = await FormSchema.find({ hotelId: { $in: hotel!._id } });
+	let countForms = forms.length;
 	if (forms.length === 0) {
 		return { ...hotel };
 	}
 	const formFilter = forms.filter((form) => form.rating);
     if (formFilter.length === 0) {
-        return { ...hotel };
+        return { ...hotel, countForms };
     }
 
 	let ratingAvg;
@@ -39,7 +40,7 @@ async function getHotelsByRating(hotel: any) {
 	let comfortableAvg;
 	let facilitiesAvg;
 	let countComments;
-	let countForms = forms.length;
+	
 	if (formFilter.length === 0) {
 		return { ...hotel, countForms };
 	}
@@ -91,4 +92,11 @@ async function getHotelsByRateAvg(hotel: any) {
 	return { ...hotel, ratingAvg, countComments };
 }
 
-export { getHotelsByService, getHotelsByRating, getHotelsByRateAvg };
+function createRandomCheapestPrice(){
+	let min = Math.ceil(200000 / 10000) * 10000; // làm tròn lên đến chục gần nhất
+    let max = Math.floor(300000 / 10000) * 10000; // làm tròn xuống đến chục gần nhất
+    let number = Math.floor(Math.random() * ((max - min) / 10000 + 1)) * 10000 + min;
+    return number;
+}
+
+export { getHotelsByService, getHotelsByRating, getHotelsByRateAvg, createRandomCheapestPrice };
