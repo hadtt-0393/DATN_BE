@@ -1,27 +1,24 @@
 type Booking = {
   _id: unknown;
-  quantity: number;
-  maxPeople: number;
-  price: number;
+  quantity: number; //số lượng phòng
+  maxPeople: number; //số lượng người tối đa/phòng
+  price: number; //giá phòng
 };
 function generateCombinationDFS<T extends Booking>(
-  bookings: T[],
-  personNum: number,
-  roomNum: number,
-  delta?: number,
-  index = 0,
+  bookings: T[], //mảng các phòng có kiểu Booking
+  personNum: number, //số người lớn + trẻ em
+  roomNum: number, //số phòng ng dùng tìm
+  delta?: number, // số lượng người có thể tìm được nhiều hơn so với số người lớn + trẻ em
+  index = 0, // lấy kết quả giá rẻ sau khi sắp xếp về giá
 ) {
-  const result: T[][] = [];
-  const stack: [number, T[]][] = [[0, []]];
+  const result: T[][] = []; // mảng kết quả trả ra là mảng các object Booking ví dụ [[T{}, T{}]]
+  const stack: [number, T[]][] = [[0, []]]; //quá trình duyệt cây theo DFS. number là độ sâu của cây, T[] là Booking
   delta =
     delta ??
     bookings.sort((a, b) => b.maxPeople - a.maxPeople)[0].maxPeople - 1;
   const sets = bookings.map((booking) => {
     const arr: T[] = [];
-    const quantity = Math.min(
-      booking.quantity,
-      Math.floor(personNum / booking.maxPeople),
-    );
+    const quantity = booking.quantity;
     for (let i = 0; i <= quantity; i++) {
       arr.push({ ...booking, quantity: i });
     }

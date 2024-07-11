@@ -169,8 +169,8 @@ const RoomController = {
 					endDate
 				),
 			}));
-			const roomService = (await getRoomsByService(roomList)) as any;
-			const roomBed = (await getRoomsByBed(roomService)) as any;
+			const roomService: any = await getRoomsByService(roomList);
+			const roomBed: any = await getRoomsByBed(roomService);
 			const resultSearch = generateCombinationDFS(
 				roomBed,
 				totalPeople,

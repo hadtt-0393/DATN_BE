@@ -15,7 +15,6 @@ import {
 import { getListRoomActive, getQuantityRoomsIsAvailable } from "../utils/room";
 import FormSchema from "../models/form";
 import UserSchema from "../models/user";
-import { hasUncaughtExceptionCaptureCallback } from "process";
 interface RequestWithUser extends Request {
 	user: any;
 }
