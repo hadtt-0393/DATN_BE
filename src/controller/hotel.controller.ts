@@ -37,7 +37,7 @@ const HotelController = {
 
 			const totalRooms = roomsType.reduce((totalRoom, roomType) => totalRoom + roomType.quantity, 0)
 			const hotelRating = await getHotelsByRating(hotel.toJSON());
-			const forms = await FormSchema.find({hotelId: id})
+			const forms = await FormSchema.find({ hotelId: id })
 
 			const formFilter = await FormSchema.find({
 				hotelId: id,
@@ -213,7 +213,7 @@ const HotelController = {
 		}
 	},
 
-	
+
 
 	async getHotelBySearch(req: Request, res: Response): Promise<any> {
 		try {
@@ -462,6 +462,27 @@ const HotelController = {
 			return res.status(400).json({ error: error });
 		}
 	},
+
+	async getAllHotelByForms(req: Request, res: Response) {
+		try {
+			let hotels = await HotelSchema.find({ isActive: true }) as any
+			hotels = await Promise.all(
+				hotels.map(async (hotel: any) => {
+					const forms = await FormSchema.find({ hotelId: hotel.id })
+					const countForms = forms.length
+					return {
+						...hotel.toObject(),
+						countForms
+					}
+				}
+				)
+			)
+
+			return res.status(200).json(hotels);
+		} catch (error) {
+			return res.status(400).json({ error: error });
+		}
+	}
 };
 
 export default HotelController;

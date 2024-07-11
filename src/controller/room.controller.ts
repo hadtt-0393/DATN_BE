@@ -127,7 +127,7 @@ const RoomController = {
 				description,
 				image,
 				maxPeople,
-				services,
+				serviceIds,
 			} = req.body;
 			const hotel = await HotelSchema.findOne({ owner: id });
 			const room = new RoomSchema({
@@ -137,7 +137,7 @@ const RoomController = {
 				description,
 				image: image,
 				maxPeople,
-				serviceIds: services,
+				serviceIds: serviceIds,
 				beds: createBed(maxPeople),
 			});
 			await room.save();

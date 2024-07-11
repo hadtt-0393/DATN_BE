@@ -43,6 +43,15 @@ function generateCombinationDFS<T extends Booking>(
     return totalPerson <= personNum + delta && totalRoom <= roomNum;
   };
   while (stack.length > 0) {
+    console.log('stack: ',stack.map(s => {
+      return `${s[0]}: ${s[1].map(C => C.quantity).join('-')}`;
+    }));
+    console.log(
+      'results: ',
+      result.map(r => r.map(C => C.quantity).join('-'))
+    );
+    
+
     const [currentIndex, currentCombination] = stack.pop()!;
     if (currentIndex === sets.length) {
       if (isValid(currentCombination)) {
